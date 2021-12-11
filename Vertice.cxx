@@ -3,20 +3,20 @@
 ClassImp(Vertice)
 
 //Costruttore di default
-Vertice::Vertice() : dmX(0.), dmY(0.), dmZ(0.), dmN(0.){}
+Vertice::Vertice() : Punto(), dmN(0.){}
 
 //Costruttore standard
-Vertice::Vertice(double x, double y, double z, int N): dmX(x), dmY(Y), dmZ(z), dmN(N), TObject(){
+Vertice::Vertice(double x, double y, double z, int N): Punto(x,y,z), dmN(N){
     dmDir.reserve(N);
 }
 
 //Costruttore d copia
-Vertice::Vertice(const Vertice& source) : dmX(source.dmX), dmY(source.dmY), dmZ(source.dmZ), dmN(source.dmN), TObject(source){
+Vertice::Vertice(const Vertice& source) : Punto(source), dmN(source.dmN){
     if(dmN>0){
         std::vector<Particella> dmDir(dmN);
 
         for(int i = 0; i<dmN; i++){
-            dmDir.At(i)=source.dmDir.At(i);
+            dmDir.at(i)=source.dmDir.at(i);
         }
     }
     else{
@@ -26,7 +26,7 @@ Vertice::Vertice(const Vertice& source) : dmX(source.dmX), dmY(source.dmY), dmZ(
 
 //Distruttore standard
 Vertice::~Vertice(){
-    delete dmDir;
+    //Per i vector non serve fare il delete
 }
 
 //Operatore copia

@@ -5,14 +5,14 @@
 
 #include "TObject.h"
 
-class Vertice: public TObject{
+class Particella: public TObject{
 
     public:
         //Costruttore standard
         Particella();
 
         //Costruttore di default
-        Paricella(double Theta, double Phi, double P);
+        Particella(double Theta, double Phi, double P);
 
         //Copy
         Particella(const Particella& source);

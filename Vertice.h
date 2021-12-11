@@ -29,7 +29,7 @@ class Vertice: public Punto{
 
         //GETTER
         int GetN() const {return dmN;};
-        Particella GetPart(int i) const {return dmDir.At(i);}; 
+        Particella GetPart(int i) const {return dmDir.at(i);}; 
 
         //SETTER
         void SetN(double N) {dmN = N;};
