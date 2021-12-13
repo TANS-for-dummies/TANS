@@ -34,7 +34,7 @@ class Vertice: public Punto{
         //SETTER
         void SetN(double N) {dmN = N;};
 
-        void AddPart(double Theta, double Phi, double p);
+        void AddPart(double Theta, double Phi);
 
 
     private:

@@ -1,4 +1,4 @@
-/*La classe particella descrive la direzione ed il modulo del momento*/
+/*La classe particella descrive la direzione di uscita dal vertice*/
 
 #ifndef PARTICELLA_H
 #define PARTICELLA_H
@@ -12,7 +12,7 @@ class Particella: public TObject{
         Particella();
 
         //Costruttore di default
-        Particella(double Theta, double Phi, double P);
+        Particella(double Theta, double Phi);
 
         //Copy
         Particella(const Particella& source);
@@ -26,12 +26,10 @@ class Particella: public TObject{
         //GETTER
         double GetTheta() const {return dmTheta;};
         double GetPhi() const {return dmPhi;};
-        double GetP() const {return dmP;};
 
         //SETTER (bau)
         void SetTheta(double Theta){ dmTheta = Theta;};
         void SetPhi(double Phi){ dmPhi = Phi;};
-        void SetP(double P){ dmP = P;};
 
 
 
@@ -39,7 +37,6 @@ class Particella: public TObject{
         //Data members
         double dmTheta;
         double dmPhi;
-        double dmP;
         
 
 

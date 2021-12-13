@@ -38,6 +38,6 @@ Vertice& Vertice::operator=(const Vertice& source){
 }
 
 //Setter di dmDir
-void Vertice::AddPart(double Theta, double Phi, double p){
-    dmDir.push_back(Particella(Theta, Phi, p));
+void Vertice::AddPart(double Theta, double Phi){
+    dmDir.push_back(Particella(Theta, Phi));
 }
