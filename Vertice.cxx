@@ -10,7 +10,7 @@ Vertice::Vertice(double x, double y, double z, int N): Punto(x,y,z), dmN(N){
     dmDir.reserve(N);
 }
 
-//Costruttore d copia
+//Costruttore di copia
 Vertice::Vertice(const Vertice& source) : Punto(source), dmN(source.dmN){
     if(dmN>0){
         std::vector<Particella> dmDir(dmN);

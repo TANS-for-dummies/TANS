@@ -22,18 +22,19 @@ class Vertice: public Punto{
         Vertice(const Vertice& source);
 
         //Distruttore
-        ~Vertice();
+        virtual ~Vertice();
 
         //Overloading operatore =
         Vertice& operator=(const Vertice& source);
 
         //GETTER
         int GetN() const {return dmN;};
-        Particella GetPart(int i) const {return dmDir.at(i);}; 
+        
+        Particella GetPart(int i) const {return dmDir.at(i);};
 
         //SETTER
         void SetN(double N) {dmN = N;};
-
+        
         void AddPart(double Theta, double Phi);
 
 

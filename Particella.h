@@ -18,7 +18,7 @@ class Particella: public TObject{
         Particella(const Particella& source);
 
         //Distruttore
-        ~Particella();
+        virtual ~Particella();
 
         //Overloading operatore =
         Particella& operator=(const Particella& source);

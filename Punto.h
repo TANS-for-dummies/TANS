@@ -25,7 +25,7 @@ class Punto : public TObject {
 		Punto();
 		Punto(double x, double y, double z);
 		Punto(const Punto& source);
-		~Punto();
+		virtual ~Punto();
 		Punto& operator=(const Punto& source);		
 		
 		/*
