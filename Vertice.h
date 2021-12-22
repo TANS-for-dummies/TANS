@@ -30,6 +30,7 @@ class Vertice: public Punto{
         //GETTER
         int GetN() const {return dmN;};
         
+        //Si potrebbe provare a passare come reference il risultato
         Particella GetPart(int i) const {return dmDir.at(i);};
 
         //SETTER

@@ -12,7 +12,7 @@ Rivelatore::Rivelatore(double r, double s, int z): dmR(r), dmS(s), dmZ(z), TObje
 Rivelatore::Rivelatore(const Rivelatore& source) : dmR(source.dmR), dmS(source.dmS), dmZ(source.dmZ), TObject(source) {}
 
 //Distruttore
-Rivelatore::~Rivelatore {}
+Rivelatore::~Rivelatore() {}
 
 //Operatore copia
 Rivelatore& Rivelatore::operator=(const Rivelatore& source){

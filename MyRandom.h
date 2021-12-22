@@ -16,13 +16,16 @@ class MyRandom : public TRandom3 {
         MyRandom& operator=(const MyRandom& source); //Operatore =
         
         //Estraiamo dagli istogrammi valori casuali
-        double RndEta();
-        double RndMolt();
-	
+        double RndTheta1();
+        int RndMolt() {return (int) dmMolt->GetRandom();};
+        
+        static bool GetFlag() {return sFlag;}
+        
     private:
-    
-    	TH1D dmEta;
-    	TH1D dmMolt;
+    	static bool sFlag;
+    	
+    	TH1D* dmEta;
+    	TH1D* dmMolt;
 	
     ClassDef(MyRandom,1)
 };
