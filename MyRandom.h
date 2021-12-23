@@ -16,8 +16,10 @@ class MyRandom : public TRandom3 {
         MyRandom& operator=(const MyRandom& source); //Operatore =
         
         //Estraiamo dagli istogrammi valori casuali
-        double RndTheta1();
-        int RndMolt() {return (int) dmMolt->GetRandom();};
+        double RndTheta();
+        int RndMolt(int) {return (int) dmMolt->GetRandom();};
+        int RndMolt_unif(int N_max) {return (int) ( Rndm()*(N_max-1) ) + 1;};
+        int RndMolt_fissa(int N){return N;};
         
         static bool GetFlag() {return sFlag;}
         
