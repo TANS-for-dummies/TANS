@@ -7,21 +7,26 @@
 //Librerie
 #include "Riostream.h"
 #include "TMath.h"
+#include <TStopwatch.h> //Monitora il tempo di CPU
 
 void MonteCarlo(int gen = 1, unsigned int seed = 125) {
-    
+	
     //Costanti
     double pi_greco = TMath::Pi();
     
     //Settaggi
     const char* input_file = "kinem.root";
     int N = 30;
-    
-    //Generatore di numeri random
-	MyRandom *ptr = new MyRandom(input_file,seed);
-	delete gRandom;
-	gRandom = ptr;
+
+    //Avviamo il timer	
+    TStopwatch timer;
+    timer.Start();
 	
+    //Generatore di numeri random
+    MyRandom *ptr = new MyRandom(input_file,seed);
+    delete gRandom;
+    gRandom = ptr;
+
     //Creazione del funtore per scegliere la molteplicita'
     int (MyRandom::*rndm_molt) (int); 
     if(gen == 1) {rndm_molt = &MyRandom::RndMolt;}
@@ -50,4 +55,7 @@ void MonteCarlo(int gen = 1, unsigned int seed = 125) {
     	cout << "Particella Numero " << i+1 << " : ( " << Ver.GetPart(i).GetTheta() << " , " <<  Ver.GetPart(i).GetPhi() << " )" << endl; 
     }
    
+	
+    timer.Stop();
+    cout << "Tempo generazione del vertice: " << timer.Print() << endl;	
 }
