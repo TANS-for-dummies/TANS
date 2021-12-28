@@ -21,7 +21,7 @@ class MyRandom : public TRandom3 {
         int RndMolt_unif(int N_max) {return (int) ( Rndm()*(N_max-1) ) + 1;};
         int RndMolt_fissa(int N){return N;};
         
-        static bool GetFlag() {return sFlag;}
+        static bool GetFlag() {return sFlag;} //static significa che è costante per ogni istanza della classe (e occupa un solo posto in memoria)
         
     private:
     	static bool sFlag;
