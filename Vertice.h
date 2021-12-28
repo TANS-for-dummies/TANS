@@ -40,8 +40,8 @@ class Vertice: public Punto{
 
     private:
         //Data members
-        int dmN;
-        std::vector<Particella> dmDir;
+        int dmN; //molteplicità
+        std::vector<Particella> dmDir; //particelle
 
 
 ClassDef(Vertice,1)
