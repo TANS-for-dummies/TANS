@@ -1,5 +1,6 @@
 #include "Particella.h"
 
+//classe importata da root
 ClassImp(Particella)
 
 //Costruttore di default
