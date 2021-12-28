@@ -1,4 +1,4 @@
-/*La classe particella descrive la direzione di uscita dal vertice*/
+/*La classe particella descrive la direzione di una particella*/
 
 #ifndef PARTICELLA_H
 #define PARTICELLA_H
@@ -17,7 +17,7 @@ class Particella: public TObject{
         //Copy
         Particella(const Particella& source);
 
-        //Distruttore
+        //Distruttore: virtual poichè viene utilizzato il distruttore di TObject (e non alloca memoria)
         virtual ~Particella();
 
         //Overloading operatore =
