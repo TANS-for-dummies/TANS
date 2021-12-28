@@ -1,5 +1,5 @@
 /*
-La classe rivelatore sii occupa di fornire i due layer sensibili ma anche la
+La classe rivelatore si occupa di fornire i due layer sensibili ma anche la
 beam pipe
 */
 
