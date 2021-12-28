@@ -15,17 +15,20 @@ MyRandom::MyRandom() : TRandom3() {
 //Costruttore standard
 MyRandom::MyRandom(const char* input_file, double seed) : TRandom3(seed) {
 	TFile F(input_file);
-	if(F.IsZombie()) {
+	if(F.IsZombie()) { //F.IsZombie è true se input_file punta ad una cella di memoria in cui non c'è il file di input
 		sFlag = true;
 	}
 
-	else{
+	else{	//prendiamo gli istogrammi dal file .root 
 		TH1D* temp_eta = (TH1D*)F.Get("heta");
 		TH1D* temp_mol = (TH1D*)F.Get("hmul");
+		
+		//mi sposto nella directory corrente, così posso chiudere il file di input e lavorare sugli istogrammi
 		temp_eta->SetDirectory(0);
 		temp_mol->SetDirectory(0);
 		F.Close();
-
+		
+		//restringiamo la distribuzione della pseudorapidità al range (-2;2)
 		TAxis *xa=temp_eta->GetXaxis();
 		Int_t b1=xa->FindBin(-2.);
 		Int_t b2=xa->FindBin(2.);
