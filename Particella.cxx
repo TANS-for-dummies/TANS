@@ -1,4 +1,5 @@
 #include "Particella.h"
+#include "TMath.h"
 
 //classe importata da root
 ClassImp(Particella)
@@ -25,3 +26,4 @@ Particella& Particella::operator=(const Particella& source){
     new(this) Particella(source);
     return *this;
 }
+

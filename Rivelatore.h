@@ -7,6 +7,14 @@ beam pipe
 #define RIVELATORE_H
 
 #include "TObject.h"
+#include "Particella.h"
+#include "MyRandom.h"
+
+//Struct per z e phi
+typedef struct:TObject{
+	double z;
+	double phi;
+} Coord_cil;
 
 class Rivelatore : public TObject {
 
@@ -15,7 +23,7 @@ class Rivelatore : public TObject {
 		Rivelatore();
 		
 		//Costruttore di default
-		Rivelatore(double r, double s, int z);
+		Rivelatore(double r, double s, double H, double Theta);
 		
 		//Copy
 		Rivelatore(const Rivelatore& source);
@@ -26,20 +34,32 @@ class Rivelatore : public TObject {
 		//Overloading dell'operatore =
 		Rivelatore& operator=(const Rivelatore& source);
 		
+		//METODI
+		Particella ZeroScattering(Particella *part, MyRandom *ptr) {return *part;};
+		Particella MultiScattering(Particella *part, MyRandom *ptr);
+
+		Coord_cil Smearing(Punto *P, MyRandom *ptr);
+
+		Punto Hit(Punto P, Particella *part);
+
+
 		//GETTER
 		double GetR() const {return dmR;};
 		double GetS() const {return dmS;};
-		int GetZ() const {return dmZ;};
+		double GetH() const {return dmH;};
+		double GetTheta() const {return dmTheta;};
 		
 		//SETTER
 		void SetR(double r) {dmR=r;};
 		void SetS(double s) {dmS=s;};
-		void SetZ(int z) {dmZ=z;};
+		void SetH(double H) {dmH=H;};
+		void SetTheta(double Theta) {dmTheta=Theta;};
 	
 	private:
 		double dmR; //Raggio
 		double dmS; //Spessore
-		int dmZ;    //Z del materiale
+		double dmH; //Lunghezza 
+		double dmTheta;    //Angolo planare medio di multiscattering
 
 ClassDef(Rivelatore,1)
 };

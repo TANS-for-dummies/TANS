@@ -4,6 +4,8 @@
 #define PARTICELLA_H
 
 #include "TObject.h"
+#include "Punto.h"
+
 
 class Particella: public TObject{
 
@@ -30,6 +32,8 @@ class Particella: public TObject{
         //SETTER (bau)
         void SetTheta(double Theta){ dmTheta = Theta;};
         void SetPhi(double Phi){ dmPhi = Phi;};
+
+        
 
 
 

@@ -41,12 +41,6 @@ class Punto : public TObject {
 		void SetY(double y) {dmY=y;};
 		void SetZ(double z) {dmZ=z;};
 		
-		/*
-		Restituisce la distanza del punto da quello messo 
-		nell'argomento, const per evitare di alterare Punto	
-		*/
-		double Distanza(Punto&) const;
-		
 		//Restituisce XX+YY raggio delle coordinatte cilindriche
 		double GetRadiusXY() const;
 	

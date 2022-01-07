@@ -39,14 +39,6 @@ Punto& Punto::operator=(const Punto& source) {
 
 //I Getter e i setter li ho già definiti nel .h
 
-//Distanza l'uso è P1.Distanza(P2) o P1->Distanza(P2)
-double Punto::Distanza(Punto& P) const {
-	double deltaX = dmX-P.dmX;
-	double deltaY = dmY-P.dmY;
-	double deltaZ = dmZ-P.dmZ;
-	return TMath::Sqrt(deltaX*deltaX+deltaY*deltaY+deltaZ*deltaZ);
-}
-
 //GetRadiusXY
 double Punto::GetRadiusXY() const {
 	return TMath::Sqrt(dmX*dmX+dmY*dmY);
