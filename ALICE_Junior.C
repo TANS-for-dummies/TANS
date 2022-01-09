@@ -7,10 +7,11 @@
 //Librerie
 #include "Riostream.h"
 #include "TMath.h"
-#include <TStopwatch.h> //Monitora il tempo di CPU
+#include "TStopwatch.h" //Monitora il tempo di CPU
 #include "TSystem.h" //Monitora RAM
 #include "TTree.h" //Output
 #include "TBranch.h"
+#include "TLeaf.h"
 #include "TClonesArray.h"
 
 void MonteCarlo(int gen = 1, bool scat = 1, unsigned int seed = 125) {
@@ -19,6 +20,7 @@ void MonteCarlo(int gen = 1, bool scat = 1, unsigned int seed = 125) {
     double pi_greco = TMath::Pi();
     
     //Settaggi input e output
+    int N_false_hit = 5;
     const char* input_file = "kinem.root";
     int N = 30;
     const char* output_file = "MonteCarlo.root";
@@ -30,6 +32,7 @@ void MonteCarlo(int gen = 1, bool scat = 1, unsigned int seed = 125) {
     TStopwatch timer;
     timer.Start();
 	
+    //Per monitorare la RAM
     ProcInfo_t* proc = new ProcInfo_t();
     cout << "RAM utilizzata: " << gSystem->GetProcInfo(proc) << endl;
 
@@ -71,16 +74,16 @@ void MonteCarlo(int gen = 1, bool scat = 1, unsigned int seed = 125) {
     if (scat){rndm_scatt = &Rivelatore::MultiScattering;}
     else {rndm_scatt = &Rivelatore::ZeroScattering;}
 
-    /*
+    
     //Apertura filedi output, e creazione di un TTree
     TFile Ofile(output_file, "RECREATE");
     TTree *tree = new TTree("Tree","TTree con 3 branches"); //Vertice, layer1 e layer2
 
-    TClonesArray *riv_1 = new TClonesArray("Coord_cil",dim);//Hit del rivelatore 1
+    TClonesArray *riv_1 = new TClonesArray("Particella",dim);//Hit del rivelatore 1
     TClonesArray &hit1 = *riv_1;
-    TClonesArray *riv_2 = new TClonesArray("Coord_cil",dim);//Hit del rivelatore 2
+    TClonesArray *riv_2 = new TClonesArray("Particella",dim);//Hit del rivelatore 2
     TClonesArray &hit2 = *riv_2;
-    */
+    
 
 
 	//Rivelatori
@@ -91,19 +94,21 @@ void MonteCarlo(int gen = 1, bool scat = 1, unsigned int seed = 125) {
 
     // Definiamo una struct 
     typedef struct{
-    Punto P;
-    int molt;} Vertice;
+    int molt;
+    Punto P;} Vertice;
     
     static Vertice inizio;
 
-    static Coord_cil segnale;
-    /*
-    tree->Branch("VertMult", &inizio.P, "P.dmX/D:P.dmY:P.dmZ:molt/I"); //DA GUARDARE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    static Particella segnale;
+    
+    //tree->Branch("VertMolt", &inizio.P, 40, 1);
+    //tree->Branch("VertMolt", &inizio.molt,"molt/I");
+    //tree->Branch("VertMult", &inizio.P, "X/D:Y:Z:molt/I"); //DA GUARDARE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     tree->Branch("Hit1", &riv_1);
     tree->Branch("Hit2", &riv_2);
-    */
+    
 
-    //Creiamo una particella (fuori dal for così viene creata una sola volta)
+    //Creiamo una particella (fuori dal for così viene creata una sola volta), sarà descritta da 2 angoli
     Particella* part = new Particella();
 
     //Creiamo un hit temporaneo
@@ -114,16 +119,20 @@ void MonteCarlo(int gen = 1, bool scat = 1, unsigned int seed = 125) {
     inizio.P = Punto(ptr->Gaus(0.,0.01),ptr->Gaus(0.,0.01),ptr->Gaus(0.,5.3));
     inizio.molt = (ptr->*rndm_molt)(N);
     
-    cout<< "(" << inizio.P.GetX()<<", "<<inizio.P.GetY()<<", "<<inizio.P.GetZ()<<")"<<endl;
+    cout << "(" << inizio.P.GetX() << ", "<<inizio.P.GetY() << ", "<<inizio.P.GetZ() << ") e molteplicutà " << inizio.molt << endl;
 
+    int pos1 = 0;
+    int pos2 = 0;
 
-    
     for(int i=0; i<inizio.molt; i++) {
         //Generiamo i prodotti nel vertice
-        part->SetTheta(ptr->RndTheta());
-        part->SetPhi(ptr->Rndm()*2.*pi_greco);
-    	cout << "Particella Numero " << i+1 << " : ( " << part->GetTheta() << " , " <<  part->GetPhi() << " )" << endl; 
+        part->SetCoord1(ptr->RndTheta());
+        part->SetCoord2(ptr->Rndm()*2.*pi_greco);
+    	cout << "Particella Numero " << i+1 << " : ( " << part->GetCoord1() << " , " <<  part->GetCoord2() << " )" << endl; 
+        
         //Trasporto e multiscattering particella per particella
+
+        
 
         //BEAM PIPE
         *hit = Beam_Pipe.Hit(inizio.P, part);
@@ -131,29 +140,52 @@ void MonteCarlo(int gen = 1, bool scat = 1, unsigned int seed = 125) {
         
         //LAYER 1
         *hit = Layer1.Hit(*hit, part);
-        if (TMath::Abs(hit -> GetZ())>Layer1.GetH()){}
+        if (TMath::Abs(hit -> GetZ())>((Layer1.GetH())/2.)){}
         else{
 
-            //Immagazziniamo lo smearing
-            //segnale = Layer1.Smearing(hit, ptr);
-            //new(hit1[i]) Coord_cil(Layer1.Smearing(hit, ptr));
+            //Immagazziniamo lo smearing (coordinale cilindriche)
+            new(hit1[pos1]) Particella(Layer1.Smearing(hit, ptr));
 
             //Multiscattering
             *part = (Layer1.*rndm_scatt)(part, ptr);
 
             //LAYER 2
             *hit = Layer2.Hit(*hit, part);
-            if(TMath::Abs(hit -> GetZ())>Layer2.GetH()){}
+            if(TMath::Abs(hit -> GetZ())>((Layer2.GetH())/2.)){}
             else{
                 //Immagazziniamo lo smearing
-                //segnale = Layer2.Smearing(hit, ptr);
-                //new(hit2[i]) Coord_cil(Layer2.Smearing(hit, ptr));
+                new(hit2[pos2]) Particella(Layer2.Smearing(hit, ptr));
+                pos2++;
             }
-
+            pos1++;
         }
 
     }
-    /*
+
+    //Generazione dei false hit (uniformi in Z e phi)
+    for(int i=0; i<N_false_hit; i++) {
+        new(hit1[pos1+i]) Particella(-(Layer1.GetH())/2.+(ptr->Rndm())*(Layer1.GetH()),ptr->Rndm()*2*pi_greco);
+        new(hit2[pos2+i]) Particella(-(Layer2.GetH())/2.+(ptr->Rndm())*(Layer2.GetH()),ptr->Rndm()*2*pi_greco);
+    }
+
+    // Debug
+    printf("Entries nel TClonesArray: %d\n",riv_1->GetEntries());
+    for (int j=0; j<hit1.GetEntries(); j++){
+      Particella *tst=(Particella*)riv_1->At(j);
+      cout<<"Particella "<<j+1<<") Z , phi = "<<tst->GetCoord1()<<"; "<<tst->GetCoord2()<<endl;
+      delete tst;
+    }
+    printf("Entries nel TClonesArray: %d\n",riv_2->GetEntries());
+    for (int j=0; j<hit2.GetEntries(); j++){
+      Particella *tst=(Particella*)riv_2->At(j);
+      cout<<"Particella "<<j+1<<") Z , phi = "<<tst->GetCoord1()<<"; "<<tst->GetCoord2()<<endl;
+      delete tst;
+    }
+    // fine del debug
+    
+    tree->GetLeaf("dmCoord1")->SetTitle("Z");
+    tree->GetLeaf("dmCoord2")->SetTitle("#phi");
+
     tree->Fill();
     riv_1->Clear();
     riv_2->Clear();
@@ -163,7 +195,7 @@ void MonteCarlo(int gen = 1, bool scat = 1, unsigned int seed = 125) {
     
     // Close the file. 
     Ofile.Close();
-    */
+    
 
     
 	

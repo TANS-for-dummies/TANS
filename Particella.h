@@ -1,4 +1,4 @@
-/*La classe particella descrive la direzione di una particella*/
+/*La classe particella descrive una particella tramite 2 coordinate eventualmente 2 angoli o 1 angolo+1 lunghezza*/
 
 #ifndef PARTICELLA_H
 #define PARTICELLA_H
@@ -14,7 +14,7 @@ class Particella: public TObject{
         Particella();
 
         //Costruttore di default
-        Particella(double Theta, double Phi);
+        Particella(double C1, double C2);
 
         //Copy
         Particella(const Particella& source);
@@ -26,12 +26,12 @@ class Particella: public TObject{
         Particella& operator=(const Particella& source);
 
         //GETTER
-        double GetTheta() const {return dmTheta;};
-        double GetPhi() const {return dmPhi;};
+        double GetCoord1() const {return dmCoord1;};
+        double GetCoord2() const {return dmCoord2;};
 
         //SETTER (bau)
-        void SetTheta(double Theta){ dmTheta = Theta;};
-        void SetPhi(double Phi){ dmPhi = Phi;};
+        void SetCoord1(double C1){ dmCoord1 = C1;};
+        void SetCoord2(double C2){ dmCoord2 = C2;};
 
         
 
@@ -39,8 +39,8 @@ class Particella: public TObject{
 
     private:
         //Data members
-        double dmTheta;
-        double dmPhi;
+        double dmCoord1;
+        double dmCoord2;
         
 
 

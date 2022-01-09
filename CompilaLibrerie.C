@@ -8,7 +8,6 @@ void CompilaLibrerie(TString Opzione="fast"){
 	}
 	gSystem->CompileMacro("Punto.cxx",Scelta.Data());
 	gSystem->CompileMacro("Particella.cxx",Scelta.Data());
-	gSystem->CompileMacro("Vertice.cxx",Scelta.Data());
 	gSystem->CompileMacro("Rivelatore.cxx",Scelta.Data());
 	gSystem->CompileMacro("MyRandom.cxx",Scelta.Data());
 	

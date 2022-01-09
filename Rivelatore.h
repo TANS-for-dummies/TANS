@@ -11,10 +11,6 @@ beam pipe
 #include "MyRandom.h"
 
 //Struct per z e phi
-typedef struct:TObject{
-	double z;
-	double phi;
-} Coord_cil;
 
 class Rivelatore : public TObject {
 
@@ -38,7 +34,7 @@ class Rivelatore : public TObject {
 		Particella ZeroScattering(Particella *part, MyRandom *ptr) {return *part;};
 		Particella MultiScattering(Particella *part, MyRandom *ptr);
 
-		Coord_cil Smearing(Punto *P, MyRandom *ptr);
+		Particella Smearing(Punto *P, MyRandom *ptr);
 
 		Punto Hit(Punto P, Particella *part);
 

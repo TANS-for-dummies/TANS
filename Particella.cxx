@@ -5,15 +5,15 @@
 ClassImp(Particella)
 
 //Costruttore di default
-Particella::Particella() : dmTheta(0.), dmPhi(0.){}
+Particella::Particella() : dmCoord1(0.), dmCoord2(0.){}
 
 //Costruttore standard
-Particella::Particella(double Theta, double Phi): dmTheta(Theta), dmPhi(Phi), TObject(){}
+Particella::Particella(double C1, double C2): dmCoord1(C1), dmCoord2(C2), TObject(){}
 
 //Costruttore d copia
 Particella::Particella(const Particella& source) : TObject(source){
-    dmTheta = source.dmTheta;
-    dmPhi = source.dmPhi;
+    dmCoord1 = source.dmCoord1;
+    dmCoord2 = source.dmCoord2;
 }
 
 //Distruttore standard
