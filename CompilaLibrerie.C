@@ -1,3 +1,6 @@
+#include "TString.h"
+#include "TSystem.h"
+
 void CompilaLibrerie(TString Opzione="fast"){
 	TString Scelta;
 	if(Opzione.Contains("force")){
@@ -10,6 +13,7 @@ void CompilaLibrerie(TString Opzione="fast"){
 	gSystem->CompileMacro("Particella.cxx",Scelta.Data());
 	gSystem->CompileMacro("Rivelatore.cxx",Scelta.Data());
 	gSystem->CompileMacro("MyRandom.cxx",Scelta.Data());
+	gSystem->CompileMacro("Segnale.cxx",Scelta.Data());
 	
 	gSystem->CompileMacro("ALICE_Junior.C",Scelta.Data());
 }

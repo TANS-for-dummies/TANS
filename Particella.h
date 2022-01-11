@@ -1,20 +1,19 @@
-/*La classe particella descrive una particella tramite 2 coordinate eventualmente 2 angoli o 1 angolo+1 lunghezza*/
+/*La classe particella descrive una particella tramite 2 angoli*/
 
 #ifndef PARTICELLA_H
 #define PARTICELLA_H
 
 #include "TObject.h"
-#include "Punto.h"
 
 
 class Particella: public TObject{
 
     public:
-        //Costruttore standard
+        //Costruttore di default
         Particella();
 
-        //Costruttore di default
-        Particella(double C1, double C2);
+        //Costruttore standard
+        Particella(double Theta, double Phi);
 
         //Copy
         Particella(const Particella& source);
@@ -26,12 +25,12 @@ class Particella: public TObject{
         Particella& operator=(const Particella& source);
 
         //GETTER
-        double GetCoord1() const {return dmCoord1;};
-        double GetCoord2() const {return dmCoord2;};
+        double GetTheta() const {return dmTheta;};
+        double GetPhi() const {return dmPhi;};
 
         //SETTER (bau)
-        void SetCoord1(double C1){ dmCoord1 = C1;};
-        void SetCoord2(double C2){ dmCoord2 = C2;};
+        void SetTheta(double Theta){ dmTheta = Theta;};
+        void SetPhi(double Phi){ dmPhi = Phi;};
 
         
 
@@ -39,8 +38,8 @@ class Particella: public TObject{
 
     private:
         //Data members
-        double dmCoord1;
-        double dmCoord2;
+        double dmTheta;
+        double dmPhi;
         
 
 

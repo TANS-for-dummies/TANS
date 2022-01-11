@@ -8,9 +8,9 @@ beam pipe
 
 #include "TObject.h"
 #include "Particella.h"
+#include "Segnale.h"
+#include "Punto.h"
 #include "MyRandom.h"
-
-//Struct per z e phi
 
 class Rivelatore : public TObject {
 
@@ -34,7 +34,7 @@ class Rivelatore : public TObject {
 		Particella ZeroScattering(Particella *part, MyRandom *ptr) {return *part;};
 		Particella MultiScattering(Particella *part, MyRandom *ptr);
 
-		Particella Smearing(Punto *P, MyRandom *ptr);
+		Segnale Smearing(Punto *P, MyRandom *ptr, int Num_part);
 
 		Punto Hit(Punto P, Particella *part);
 

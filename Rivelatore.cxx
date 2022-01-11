@@ -26,19 +26,19 @@ Rivelatore& Rivelatore::operator=(const Rivelatore& source){
 
 Particella Rivelatore::MultiScattering(Particella *part, MyRandom *ptr){
     //La particella è considerata descritta da 2 angoli
-    double ThetaP = ptr -> Gaus(dmTheta,(TMath::Sqrt2())*dmTheta); //DA CHIEDERE A MASERA CON URGENZA!!!!!!!!!!!!!!!!!
+    double ThetaP = ptr -> Gaus(0,dmTheta); 
     double PhiP = ptr -> Rndm()*2.*TMath::Pi();
 
     double mr[3][3];
-    mr[0][0] = - TMath::Sin(part->GetCoord2()); 
-    mr[1][0] = TMath::Cos(part->GetCoord2()); 
+    mr[0][0] = - TMath::Sin(part->GetPhi()); 
+    mr[1][0] = TMath::Cos(part->GetPhi()); 
     mr[2][0] = 0;
-    mr[0][1] = - TMath::Cos(part->GetCoord2())*TMath::Cos(part->GetCoord1()); 
-    mr[1][1] = - TMath::Cos(part->GetCoord1())*TMath::Sin(part->GetCoord2());
-    mr[2][1] = TMath::Sin(part->GetCoord1()); 
-    mr[0][2] = TMath::Cos(part->GetCoord2())*TMath::Sin(part->GetCoord1());
-    mr[1][2] = TMath::Sin(part->GetCoord1())*TMath::Sin(part->GetCoord2());
-    mr[2][2] = TMath::Cos(part->GetCoord1());
+    mr[0][1] = - TMath::Cos(part->GetPhi())*TMath::Cos(part->GetTheta()); 
+    mr[1][1] = - TMath::Cos(part->GetTheta())*TMath::Sin(part->GetPhi());
+    mr[2][1] = TMath::Sin(part->GetTheta()); 
+    mr[0][2] = TMath::Cos(part->GetPhi())*TMath::Sin(part->GetTheta());
+    mr[1][2] = TMath::Sin(part->GetTheta())*TMath::Sin(part->GetPhi());
+    mr[2][2] = TMath::Cos(part->GetTheta());
 
     double scat[3];
     scat[0] = TMath::Sin(ThetaP)*TMath::Cos(PhiP);
@@ -58,13 +58,12 @@ Particella Rivelatore::MultiScattering(Particella *part, MyRandom *ptr){
     return Particella(final_theta,final_phi);
 }
 
-Particella Rivelatore:: Smearing(Punto *P, MyRandom *ptr){
-    //Qui la particella è descritta in coordinate cilindriche, per nostra convenzione (Z,phi)
+Segnale Rivelatore:: Smearing(Punto *P, MyRandom *ptr, int Num_part){
 
     double z = P->GetZ() + ptr->Gaus(0,0.012);
     double phi = TMath::ATan( (P->GetY())/(P->GetX()) ) + (ptr->Gaus(0,0.003))/P->GetRadiusXY();
 
-    Particella temp(z,phi);
+    Segnale temp(z,phi,Num_part);
 
     return temp; 
 }
@@ -75,9 +74,9 @@ Punto Rivelatore::Hit(Punto P, Particella *part){
     double y0 = P.GetY();
     double z0 = P.GetZ();
 
-    double c1 = TMath::Sin(part->GetCoord1()) * TMath::Cos(part->GetCoord2());
-    double c2 = TMath::Sin(part->GetCoord1()) * TMath::Sin(part->GetCoord2());
-    double c3 = TMath::Cos(part->GetCoord1());
+    double c1 = TMath::Sin(part->GetTheta()) * TMath::Cos(part->GetPhi());
+    double c2 = TMath::Sin(part->GetTheta()) * TMath::Sin(part->GetPhi());
+    double c3 = TMath::Cos(part->GetTheta());
 
     double r = dmR + 0.5*dmS;
 
