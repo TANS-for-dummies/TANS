@@ -95,18 +95,17 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
 
     // Definiamo una struct 
     typedef struct{
-    int molt;
-    Punto P;} Vertice;
+        double x, y, z;
+        int molt;
+    } Vertice;
     
     static Vertice inizio;
-
-    static Particella segnale;
     
-    //tree->Branch("VertMolt", &inizio.P, 40, 1);
-    //tree->Branch("VertMolt", &inizio.molt,"molt/I");
-    //tree->Branch("VertMult", &inizio.P, "X/D:Y:Z:molt/I"); //DA GUARDARE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    tree->Branch("VertMult", &inizio.x, "x/D:y:z:molt/I"); 
     tree->Branch("Hit1", &riv_1);
     tree->Branch("Hit2", &riv_2);
+
+    tree->SetAutoSave(0); //Rimuove backup cycle
     
 
     //Creiamo una particella (fuori dal for così viene creata una sola volta), sarà descritta da 2 angoli
@@ -119,10 +118,12 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
     for(int k=0; k<N_esp; k++){
         //Iniziamo a generare il vertice, ci servono 3 coordinate e la molteplicità
         //Unità di misura della lunghezza = cm
-        inizio.P = Punto(ptr->Gaus(0.,0.01),ptr->Gaus(0.,0.01),ptr->Gaus(0.,5.3));
+        inizio.x = ptr->Gaus(0.,0.01);
+        inizio.y = ptr->Gaus(0.,0.01);
+        inizio.z = ptr->Gaus(0.,5.3);
         inizio.molt = (ptr->*rndm_molt)(N);
         
-        std::cout << "(" << inizio.P.GetX() << ", "<<inizio.P.GetY() << ", "<<inizio.P.GetZ() << ") e molteplicità " << inizio.molt << std::endl;
+        std::cout << "(" << inizio.x << ", "<<inizio.y << ", "<<inizio.z << ") e molteplicità " << inizio.molt << std::endl;
 
         int pos1 = 0;
         int pos2 = 0;
@@ -138,7 +139,7 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
             
 
             //BEAM PIPE
-            *hit = Beam_Pipe.Hit(inizio.P, part);
+            *hit = Beam_Pipe.Hit(Punto(inizio.x, inizio.y, inizio.z), part);
             *part = (Beam_Pipe.*rndm_scatt)(part, ptr);
             
             //LAYER 1
@@ -188,21 +189,6 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
         }
         // fine del debug
         
-
-
-        /*
-        TLeaf *leaf;
-        leaf = tree->GetLeaf("Hit1", "Hit1.dmCoord1");
-        if (leaf != NULL) {
-            //leaf->SetTitle("Z");
-            leaf->SetName("Z");
-        }
-            
-        else
-            cout << "LEAF NOT FOUND!" << endl;
-
-        tree->GetLeaf("Hit1", "dmCoord2")->SetTitle("#phi");
-    */
 
         tree->Fill();
 
