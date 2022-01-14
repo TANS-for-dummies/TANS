@@ -3,7 +3,7 @@
 #include "Rivelatore.h"
 #include "Particella.h"
 #include "Segnale.h"
-#include "Punto.h" 
+#include "Punto.h"
 
 //Librerie
 #include "Riostream.h"
@@ -14,6 +14,9 @@
 #include "TBranch.h"
 #include "TLeaf.h"
 #include "TClonesArray.h"
+#include <fstream>
+
+
 
 void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int seed = 125) {
 	
@@ -32,10 +35,14 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
     //Avviamo il timer	
     TStopwatch timer;
     timer.Start();
+    
+    //Apro il file di log
+    std::ofstream ofs ("simulation_log.txt", std::ofstream::out);
+
 	
     //Per monitorare la RAM
     ProcInfo_t* proc = new ProcInfo_t();
-    std::cout << "RAM utilizzata: " << gSystem->GetProcInfo(proc) << std::endl;
+    ofs << "RAM utilizzata: " << gSystem->GetProcInfo(proc) << std::endl;
 
     //Generatore di numeri random
     MyRandom *ptr = new MyRandom(input_file,seed);
@@ -43,7 +50,7 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
     gRandom = ptr;
 
     if (ptr->GetFlag()) {
-    	std::cout << "File con le distribuzioni non trovato" << std::endl; 
+    	ofs << "File con le distribuzioni non trovato" << std::endl; 
     	return;
     }
 
@@ -63,7 +70,7 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
         rndm_molt = &MyRandom::RndMolt_fissa;
         dim = N;
         }
-    else {std::cout << "Scelta non valida. Impostato il settaggio di base: estrazione dall'istogramma" << std::endl;
+    else {ofs << "Scelta non valida. Impostato il settaggio di base: estrazione dall'istogramma" << std::endl;
         rndm_molt = &MyRandom::RndMolt;
         dim = 36;
         }
@@ -123,8 +130,8 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
         inizio.z = ptr->Gaus(0.,5.3);
         inizio.molt = (ptr->*rndm_molt)(N);
         
-        std::cout << "(" << inizio.x << ", "<<inizio.y << ", "<<inizio.z << ") e molteplicità " << inizio.molt << std::endl;
-
+	if (k/1000 == 0){ofs << "(" << inizio.x << ", "<<inizio.y << ", "<<inizio.z << ") e molteplicità " << inizio.molt << std::endl;};
+	
         int pos1 = 0;
         int pos2 = 0;
 
@@ -132,7 +139,7 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
             //Generiamo i prodotti nel vertice
             part->SetTheta(ptr->RndTheta());
             part->SetPhi(ptr->Rndm()*2.*pi_greco);
-            std::cout << "Particella Numero " << i+1 << " : ( " << part->GetTheta() << " , " <<  part->GetPhi() << " )" << std::endl; 
+            if (k/1000 == 0){ofs << "Particella Numero " << i+1 << " : ( " << part->GetTheta() << " , " <<  part->GetPhi() << " )" << std::endl;}; 
             
             //Trasporto e multiscattering particella per particella
 
@@ -177,14 +184,14 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
         for (int j=0; j<hit1.GetEntries(); j++){
         Particella *tst = (Particella*)hit1[j];
         // Particella *tst=(Particella*)riv_1->At(j);
-        std::cout<<"Particella "<<j+1<<") Z , phi = "<<tst->GetTheta()<<"; "<<tst->GetPhi()<<std::endl;
+        if (k/1000 == 0){ofs <<"Particella "<<j+1<<") Z , phi = "<<tst->GetTheta()<<"; "<<tst->GetPhi()<<std::endl;};
         //delete tst;
         }
         printf("Entries nel TClonesArray: %d\n",riv_2->GetEntries());
         for (int j=0; j<hit2.GetEntries(); j++){
         Particella *tst = (Particella*)hit2[j];
         //Particella *tst=(Particella*)riv_2->At(j);
-        std::cout<<"Particella "<<j+1<<") Z , phi = "<<tst->GetTheta()<<"; "<<tst->GetPhi()<<std::endl;
+        if (k/1000 == 0){ofs <<"Particella "<<j+1<<") Z , phi = "<<tst->GetTheta()<<"; "<<tst->GetPhi()<<std::endl;};
         //delete tst;
         }
         // fine del debug
@@ -205,8 +212,9 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
     timer.Stop();
     timer.Print();
 
-    std::cout << "RAM utilizzata: " << gSystem->GetProcInfo(proc) << std::endl;
+    ofs << "RAM utilizzata: " << gSystem->GetProcInfo(proc) << std::endl;
 	
+    ofs.close();
     delete part;
     delete hit;
 
