@@ -1,0 +1,77 @@
+RAM utilizzata: 0
+(0.026006, 0.0030219, -4.86049) e molteplicità 30
+Particella Numero 1 : ( 2.71337 , 6.08659 )
+Particella Numero 2 : ( 1.54628 , 3.89251 )
+Particella Numero 3 : ( 2.78046 , 0.217412 )
+Particella Numero 4 : ( 1.44774 , 5.24161 )
+Particella Numero 5 : ( 0.815177 , 6.14431 )
+Particella Numero 6 : ( 2.33506 , 2.41817 )
+Particella Numero 7 : ( 1.0942 , 0.0146373 )
+Particella Numero 8 : ( 1.32318 , 3.30129 )
+Particella Numero 9 : ( 0.295882 , 0.888413 )
+Particella Numero 10 : ( 2.30798 , 5.84597 )
+Particella Numero 11 : ( 2.63475 , 2.89821 )
+Particella Numero 12 : ( 0.346479 , 3.17343 )
+Particella Numero 13 : ( 2.59592 , 5.1265 )
+Particella Numero 14 : ( 1.51449 , 0.236235 )
+Particella Numero 15 : ( 2.74738 , 1.71544 )
+Particella Numero 16 : ( 0.499987 , 3.99633 )
+Particella Numero 17 : ( 1.02497 , 3.74484 )
+Particella Numero 18 : ( 2.83327 , 4.56446 )
+Particella Numero 19 : ( 1.80823 , 2.17134 )
+Particella Numero 20 : ( 2.4461 , 3.85619 )
+Particella Numero 21 : ( 0.779322 , 1.77256 )
+Particella Numero 22 : ( 0.378443 , 1.8679 )
+Particella Numero 23 : ( 0.350458 , 1.07502 )
+Particella Numero 24 : ( 0.856598 , 1.94196 )
+Particella Numero 25 : ( 0.534837 , 1.79233 )
+Particella Numero 26 : ( 0.301132 , 1.69039 )
+Particella Numero 27 : ( 1.28289 , 4.17661 )
+Particella Numero 28 : ( 0.440006 , 2.4632 )
+Particella Numero 29 : ( 2.03736 , 6.02379 )
+Particella Numero 30 : ( 0.445254 , 0.299929 )
+Particella 1) Z , phi = -4.71119; 0.108986
+Particella 2) Z , phi = -3.92861; 0.314881
+Particella 3) Z , phi = -1.07149; -0.0680335
+Particella 4) Z , phi = -8.72731; -0.72904
+Particella 5) Z , phi = -2.8103; 0.0160452
+Particella 6) Z , phi = -3.82656; 0.0802693
+Particella 7) Z , phi = 8.23394; 0.883056
+Particella 8) Z , phi = -8.78962; -0.181411
+Particella 9) Z , phi = -12.1256; -0.245826
+Particella 10) Z , phi = 6.32729; 0.0161786
+Particella 11) Z , phi = -4.63534; 0.23632
+Particella 12) Z , phi = 6.39064; -0.00637562
+Particella 13) Z , phi = -1.92344; 0.18581
+Particella 14) Z , phi = -5.85783; -0.976323
+Particella 15) Z , phi = -11.1861; 0.134
+Particella 16) Z , phi = -0.801349; -1.37718
+Particella 17) Z , phi = 5.23112; -1.28096
+Particella 18) Z , phi = 6.05935; 1.06968
+Particella 19) Z , phi = -1.39913; -1.20604
+Particella 20) Z , phi = 1.91543; -1.35571
+Particella 21) Z , phi = 8.07005; -1.45876
+Particella 22) Z , phi = -2.62583; -0.309989
+Particella 23) Z , phi = 3.68439; -0.683863
+Particella 24) Z , phi = -6.93476; -0.124821
+Particella 25) Z , phi = 3.48517; 0.299236
+Particella 1) Z , phi = -4.62858; -0.30373
+Particella 2) Z , phi = -3.51375; 0.652272
+Particella 3) Z , phi = 1.791; 0.020479
+Particella 4) Z , phi = -11.6039; -0.725982
+Particella 5) Z , phi = -1.24549; 0.0158979
+Particella 6) Z , phi = -3.06493; -0.0231162
+Particella 7) Z , phi = -11.8024; 0.0988856
+Particella 8) Z , phi = -4.45887; 0.235906
+Particella 9) Z , phi = 13.1319; -0.41071
+Particella 10) Z , phi = 0.233661; -0.185564
+Particella 11) Z , phi = -6.56703; -0.972752
+Particella 12) Z , phi = 2.21352; -1.37215
+Particella 13) Z , phi = 12.784; -1.27806
+Particella 14) Z , phi = 1.22423; -1.20412
+Particella 15) Z , phi = 6.97986; -1.35254
+Particella 16) Z , phi = -1.61624; -0.645571
+Particella 17) Z , phi = 10.0826; -0.680906
+Particella 18) Z , phi = -8.49087; 0.0438442
+Particella 19) Z , phi = 9.763; 0.299049
+RAM utilizzata: 0

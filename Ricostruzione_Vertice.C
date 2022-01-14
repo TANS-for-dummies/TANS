@@ -52,7 +52,7 @@ void Ricostruzione_Vertice(int dim = 36){
     Tracklet* tr = new Tracklet(r1, r2, 0., 0.); //Primo punto: layer 1; Secondo punto: layer 2
 
     //Creiamo un istogramma per le z
-    TH1D* histo_z = new TH1D("histo_z", "Istogramma delle z", 150, -21.2, 21.2); //4 sigma a destra e a sinistra
+    TH1D* histo_z = new TH1D("histo_z", "Istogramma delle z", 250, -21.2, 21.2); //4 sigma a destra e a sinistra
 
     // loop sugli ingressi nel TTree
     for(int i=0; i<tree->GetEntries(); i++){
@@ -90,7 +90,7 @@ void Ricostruzione_Vertice(int dim = 36){
            }
 
        }
-
+        histo_z->DrawCopy();
        //Reset dell'istogramma 
        histo_z->Reset();
     }

@@ -24,7 +24,7 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
     double pi_greco = TMath::Pi();
     
     //Settaggi input e output
-    int N_false_hit = 5;
+    int N_false_hit = 0;
     const char* input_file = "kinem.root";
     int N = 30;
     const char* output_file = "MonteCarlo.root";
