@@ -10,6 +10,9 @@
 #include "TMath.h"
 #include "TClonesArray.h"
 #include "TH1D.h"
+#include "vector"
+
+using std::vector;
 
 void Ricostruzione_Vertice(int dim = 36){
     //dim = 36: dimensione minima dei TClonesArray
@@ -20,7 +23,7 @@ void Ricostruzione_Vertice(int dim = 36){
     //Settaggi
     double r1 = 4.; //cm
     double r2 = 7.; //cm
-    double delta_phi = (10*pi_greco)/180; //ampiezza angolare in rad entro cui cercare corrispondenza hit
+    double delta_phi = 0.4; //ampiezza angolare in rad entro cui cercare corrispondenza hit
 
     // definizione struct
     typedef struct {
@@ -51,8 +54,9 @@ void Ricostruzione_Vertice(int dim = 36){
     //Creiamo un tracklet, con r1 ed r2 fissati
     Tracklet* tr = new Tracklet(r1, r2, 0., 0.); //Primo punto: layer 1; Secondo punto: layer 2
 
-    //Creiamo un istogramma per le z
+    //Creiamo un istogramma e un vector per le z
     TH1D* histo_z = new TH1D("histo_z", "Istogramma delle z", 250, -21.2, 21.2); //4 sigma a destra e a sinistra
+    vector<double> vec_z; 
 
     // loop sugli ingressi nel TTree
     for(int i=0; i<tree->GetEntries(); i++){
@@ -86,11 +90,31 @@ void Ricostruzione_Vertice(int dim = 36){
                 if( (interazione1->GetPhi() - interazione2->GetPhi()) <= delta_phi ){
                     tr->SetZ2(interazione2->GetZ());
                     histo_z->Fill(tr->Intersezione());
+                    vec_z.push_back(tr->Intersezione()); //riempiamo il vector
                 }
            }
-
        }
+        
         histo_z->DrawCopy();
+        vec_z.sort(vec_z.begin(), vec_z.end()); //riordiniamo gli elementi del vector in ordine crescente
+        
+        int max_bin = histo_z->GetMaximumBin(); //bin con massimo numero di conteggi 
+        double min_edge = histo_z->GetBinLowEdge(max_bin); //estremo inferiore del bin considerato 
+        double max_edge = min_edge + histo_z->GetBinWidth(max_bin); //estremo superiore del bin considerato 
+        
+        int count = 0;
+        double somma = 0;
+        for(int j=0; j<vec_z.size(); j++){
+            if(vec_z.at(j)>min_edge && vec_z.at(j)<max_edge) {
+                somma = somma + vec_z.at(j);
+                count++;
+            }
+        }
+        
+        if(count != 0) somma = somma/count; //z ricostruita
+        
+
+        
        //Reset dell'istogramma 
        histo_z->Reset();
     }
