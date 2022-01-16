@@ -102,21 +102,23 @@ void Ricostruzione_Vertice(int dim = 36){
         double min_edge = histo_z->GetBinLowEdge(max_bin); //estremo inferiore del bin considerato 
         double max_edge = min_edge + histo_z->GetBinWidth(max_bin); //estremo superiore del bin considerato 
         
+        //Calcoliamo la media degli elementi presenti nel bin con massimo numero di conteggi
         int count = 0;
-        double somma = 0;
+        double media = 0;
         for(int j=0; j<vec_z.size(); j++){
             if(vec_z.at(j)>min_edge && vec_z.at(j)<max_edge) {
-                somma = somma + vec_z.at(j);
+                media = media + vec_z.at(j);
                 count++;
             }
         }
         
-        if(count != 0) somma = somma/count; //z ricostruita
+        if(count != 0) media = media/count; //z ricostruita
         
 
         
-       //Reset dell'istogramma 
+       //Reset dell'istogramma e clear del vector
        histo_z->Reset();
+       vec_z.clear(); 
     }
 
 }
