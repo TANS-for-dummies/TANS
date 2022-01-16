@@ -114,6 +114,7 @@ void Ricostruzione_Vertice(int dim = 36){
         
         if(count != 0) media = media/count; //z ricostruita
         
+        std::cout << "Z rec: " << media << std::endl;        
 
         
        //Reset dell'istogramma e clear del vector
