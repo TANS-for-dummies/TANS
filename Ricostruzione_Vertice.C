@@ -11,7 +11,6 @@
 #include "TClonesArray.h"
 #include "TH1D.h"
 #include "vector"
-#☺include "algorithm"
 
 using std::vector;
 
@@ -97,7 +96,6 @@ void Ricostruzione_Vertice(int dim = 36){
        }
         
         histo_z->DrawCopy();
-        sort(vec_z.begin(), vec_z.end()); //riordiniamo gli elementi del vector in ordine crescente
         
         int max_bin = histo_z->GetMaximumBin(); //bin con massimo numero di conteggi 
         double min_edge = histo_z->GetBinLowEdge(max_bin); //estremo inferiore del bin considerato 
