@@ -53,11 +53,16 @@ void Ricostruzione_Vertice(int dim = 36){
 
     //Creiamo un tracklet, con r1 ed r2 fissati
     Tracklet* tr = new Tracklet(r1, r2, 0., 0.); //Primo punto: layer 1; Secondo punto: layer 2
-
+    
     //Creiamo un istogramma e un vector per le z
     TH1D* histo_z = new TH1D("histo_z", "Istogramma delle z", 250, -21.2, 21.2); //4 sigma a destra e a sinistra
     vector<double> vec_z; 
+    
+    double Z_rec;
 
+    //Creiamo gli istogrammi con cui analizzeremo l'efficienza del nostro algoritmo
+    TH1D* deltaZ = new TH1D("deltaZ","Residui",100,-0.05,0.05);
+    
     // loop sugli ingressi nel TTree
     for(int i=0; i<tree->GetEntries(); i++){
         tree->GetEvent(i);
@@ -101,20 +106,41 @@ void Ricostruzione_Vertice(int dim = 36){
         double min_edge = histo_z->GetBinLowEdge(max_bin); //estremo inferiore del bin considerato 
         double max_edge = min_edge + histo_z->GetBinWidth(max_bin); //estremo superiore del bin considerato 
         
-        //Calcoliamo la media degli elementi presenti nel bin con massimo numero di conteggi
-        int count = 0;
-        double media = 0;
-        for(int j=0; j<vec_z.size(); j++){
-            if(vec_z.at(j)>min_edge && vec_z.at(j)<max_edge) {
-                media = media + vec_z.at(j);
-                count++;
+        //Calcoliamo una media dei conteggi nei bin non nulli, la useremo per fare un controllo sul vertice
+        int count_hist = 0;
+        double media_hist = 0.;
+        for(int j=0; j<histo_z->GetNbinsX(); j++){
+            if(histo_z->GetBinContent(j+1)>0) {
+                media_hist = media_hist + histo_z->GetBinContent(j+1);
+                count_hist++;
             }
         }
         
-        if(count != 0) media = media/count; //z ricostruita
+        if(count_hist != 0) media_hist = media_hist/count_hist;
         
-        std::cout << "Z rec: " << media << std::endl;        
-
+        if(media_hist<histo_z->GetBinContent(max_bin)){
+            //Calcoliamo la media degli elementi presenti nel bin con massimo numero di conteggi
+            int count = 0;
+            double somma = 0;
+            for(int j=0; j<vec_z.size(); j++){
+                if(vec_z.at(j)>min_edge && vec_z.at(j)<max_edge) {
+                    somma = somma + vec_z.at(j);
+                    count++;
+                }
+            }
+        
+            if(count != 0) Z_rec = somma/count;        
+            std::cout << "Z rec: " << Z_rec << std::endl;  
+            
+            deltaZ->Fill(Z_rec-inizio.z);
+        }
+        else if(vec_z.size()==1){
+            Z_rec=vec_z.at(0);
+            std::cout << "Z rec: " << Z_rec << std::endl;
+            
+            deltaZ->Fill(Z_rec-inizio.z);
+        }
+            
         
        //Reset dell'istogramma e clear del vector
        histo_z->Reset();
