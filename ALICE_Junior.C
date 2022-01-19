@@ -115,7 +115,7 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
     tree->SetAutoSave(0); //Rimuove backup cycle
     
 
-    //Creiamo una particella (fuori dal for così viene creata una sola volta), sarà descritta da 2 angoli
+    //Creiamo una particella (fuori dal for cosi viene creata una sola volta), sara descritta da 2 angoli
     Particella* part = new Particella();
 
     //Creiamo un hit temporaneo
@@ -123,14 +123,14 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
     
     
     for(int k=0; k<N_esp; k++){
-        //Iniziamo a generare il vertice, ci servono 3 coordinate e la molteplicità
-        //Unità di misura della lunghezza = cm
+        //Iniziamo a generare il vertice, ci servono 3 coordinate e la molteplicita
+        //Unita di misura della lunghezza = cm
         inizio.x = ptr->Gaus(0.,0.01);
         inizio.y = ptr->Gaus(0.,0.01);
         inizio.z = ptr->Gaus(0.,5.3);
         inizio.molt = (ptr->*rndm_molt)(N);
         
-	if (k/1000 == 0){ofs << "(" << inizio.x << ", "<<inizio.y << ", "<<inizio.z << ") e molteplicità " << inizio.molt << std::endl;};
+	if (k/1000 == 0){ofs << "(" << inizio.x << ", "<<inizio.y << ", "<<inizio.z << ") e molteplicita " << inizio.molt << std::endl;};
 	
         int pos1 = 0;
         int pos2 = 0;
@@ -182,16 +182,16 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
         // Debug
         printf("Entries nel TClonesArray: %d\n",riv_1->GetEntries());
         for (int j=0; j<hit1.GetEntries(); j++){
-        Particella *tst = (Particella*)hit1[j];
+        Segnale *tst = (Segnale*)hit1[j];
         // Particella *tst=(Particella*)riv_1->At(j);
-        if (k/1000 == 0){ofs <<"Particella "<<j+1<<") Z , phi = "<<tst->GetTheta()<<"; "<<tst->GetPhi()<<std::endl;};
+        if (k/1000 == 0){ofs <<"Particella "<<j+1<<") Z , phi = "<<tst->GetZ()<<"; "<<tst->GetPhi()<<std::endl;};
         //delete tst;
         }
         printf("Entries nel TClonesArray: %d\n",riv_2->GetEntries());
         for (int j=0; j<hit2.GetEntries(); j++){
-        Particella *tst = (Particella*)hit2[j];
+        Segnale *tst = (Segnale*)hit2[j];
         //Particella *tst=(Particella*)riv_2->At(j);
-        if (k/1000 == 0){ofs <<"Particella "<<j+1<<") Z , phi = "<<tst->GetTheta()<<"; "<<tst->GetPhi()<<std::endl;};
+        if (k/1000 == 0){ofs <<"Particella "<<j+1<<") Z , phi = "<<tst->GetZ()<<"; "<<tst->GetPhi()<<std::endl;};
         //delete tst;
         }
         // fine del debug
