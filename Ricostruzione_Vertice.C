@@ -81,8 +81,8 @@ void Ricostruzione_Vertice(int dim = 36){
     //loop sull'array di molteplicita studiate per creare gli istogrammi di deltaZ per
     //singole molteplicita
     for (int i=0;i<dim_molt;i++) {
-        sprintf(nome,"fixed molt %i",molteplicita_studiate[i]);
-        sprintf(titolo,"Residui - molteplicita' fissata a %i",molteplicita_studiate[i]);
+        sprintf(nome,"fixed molt %f",molteplicita_studiate[i]);
+        sprintf(titolo,"Residui - molteplicita' fissata a %f",molteplicita_studiate[i]);
         histo_molt[i] = new TH1D(nome,titolo,100,-1000,1000);
         histo_molt[i]->GetXaxis()->SetTitle("Zrec-Zvera [#mum]");
         histo_molt[i]->SetMarkerStyle(33);
