@@ -65,7 +65,6 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5){
     TH1D* histo_z = new TH1D("histo_z", "Istogramma delle z", 250, -21.2, 21.2); //4 sigma a destra e a sinistra
     vector<double> vec_z; 
     
-    double Z_rec;
 
     //Creiamo gli istogrammi con cui analizzeremo l'efficienza del nostro algoritmo
     TH1D* deltaZ = new TH1D("deltaZ","Residui",100,-1000,1000);
@@ -141,6 +140,7 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5){
         
         sort(vec_z.begin(), vec_z.end()); //riordiniamo il vector in ordine crescente
         
+
         /*
         int max_bin = histo_z->GetMaximumBin(); //bin con massimo numero di conteggi 
         double min_edge = histo_z->GetBinLowEdge(max_bin); //estremo inferiore del bin considerato 
@@ -160,43 +160,58 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5){
         */
         
         int vec_dim = vec_z.size();
-
+        
         bool Rec = 1; //indica che riusciamo a ricostruire il vertice
         
         //running window: scorriamo il vector cercando la finestra con il maggior numero di conteggi
         int j_max = 0; //inizio della finestra contenente il massimo numero di conteggi
         int conteggi_max = 0; //tiene conto dei conteggi nella fienstra contenente il picco
-        
         for(int j=0; j<vec_dim; j++){
             bool inside = 1; //verifica se si è all'interno della window
             int k = j;
             int conteggi_temp = 0; //tiene conto dei conteggi nella fienstra considerata di volta in volta
             while(inside){
-                if( vec_z.at(k)<=vec_z.at(j) + window && k<vec_dim ){ //controllo di essere dentro la finestra e di non eccedere la dimensione del vector
+                if( k<vec_dim && (vec_z.at(k)<=vec_z.at(j) + window) ){ //controllo di essere dentro la finestra e di non eccedere la dimensione del vector
                     conteggi_temp++;
                 }
                 else inside = 0;
                 k++;
             }
-            
+            //cout << conteggi_temp << " in " << j << " che sta tra " << vec_z.at(j) << " e " << vec_z.at(j)+window << endl;
+
             if(conteggi_temp > conteggi_max){
                 conteggi_max = conteggi_temp;
                 j_max = j;
+                Rec = 1;
             }
             else if(conteggi_temp == conteggi_max){
-                if( (vec_z.at(j) - vec_z.at(j_max)) < window ) cout << "j = j_max!!!" << endl;
+                if( (vec_z.at(j) - vec_z.at(j_max)) < window ) {
+                    //cout << "Sono vicini " << vec_z.at(j) - vec_z.at(j_max) << " in " << vec_z.at(j_max) << endl;
+                    }
                 else Rec = 0; //non ricostruiamo il vertice
             }
         
         }
         
+        //cout << "Vertice tra " << vec_z.at(j_max) << " e " << vec_z.at(j_max)+window << endl;
+
+        double Z_rec=0.;
+
         //calcoliamo la media
         if(Rec && vec_dim != 1 && vec_dim != 0){
             for(int j=j_max; j<(j_max+conteggi_max); j++){
-                Z_rec = vec_z.at(j)/(double)conteggi_max;
+                Z_rec += vec_z.at(j)/(double)conteggi_max;
             }
-        }
+        }   
+        else if(vec_dim==1){
+            Z_rec=vec_z.at(0);
+            //cout << "Z rec: " << Z_rec << endl;
+
+        }  
+        else Rec = 0;    
         
+        //cout << "Z rec: " << Z_rec << endl;
+        //cout << "Z true: " << inizio.z << endl;
         
         /*
         if(media_hist<histo_z->GetBinContent(max_bin)){
@@ -216,14 +231,12 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5){
             //std::cout << "Z rec: " << Z_rec << std::endl;  
 
         }
-        */
+        
         else if(vec_dim==1){
             Z_rec=vec_z.at(0);
-            //std::cout << "Z rec: " << Z_rec << std::endl;
+            cout << "Z rec: " << Z_rec << endl;
 
-        }
-        
-        else if(vec_dim==0) Rec = 0;
+        } */     
             
         if(Rec) {
             deltaZ->Fill((Z_rec-inizio.z)*10000);
@@ -244,13 +257,12 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5){
        histo_z->Reset();
        vec_z.clear(); 
     }
-
     for(int i=0;i<dim_molt;i++) {
         eff[i]=eff[i]/conta_molt[i];
     }
 
     deltaZ->DrawCopy("pe");
-
+    
     TCanvas* c2 = new TCanvas("c2","c2",80,80,1500,1000);
     c2->Divide(5,2);
     for(int i=0;i<dim_molt;i++) {
@@ -266,4 +278,6 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5){
     efficienza->SetMarkerStyle(20);
     efficienza->SetMarkerColor(97);
     efficienza->Draw("APC");
+    
+   
 }
