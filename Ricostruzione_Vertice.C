@@ -171,7 +171,7 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5){
             bool inside = 1; //verifica se si è all'interno della window
             int k = j;
             int conteggi_temp = 0; //tiene conto dei conteggi nella fienstra considerata di volta in volta
-            for(inside){
+            while(inside){
                 if( vec_z.at(k)<=vec_z.at(j) + window && k<vec_dim ){ //controllo di essere dentro la finestra e di non eccedere la dimensione del vector
                     conteggi_temp++;
                 }
