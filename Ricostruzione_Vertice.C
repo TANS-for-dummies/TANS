@@ -11,6 +11,7 @@
 #include "TMath.h"
 #include "TClonesArray.h"
 #include "TH1D.h"
+#include "TStyle.h"
 #include "TGraphErrors.h"
 #include "vector"
 #include "algorithm"
@@ -27,7 +28,7 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5){
     //Settaggi
     double r1 = 4.; //cm
     double r2 = 7.; //cm
-    double delta_phi = 0.4; //ampiezza angolare in rad entro cui cercare corrispondenza hit
+    double delta_phi = 0.005; //ampiezza angolare in rad entro cui cercare corrispondenza hit
     
     const int dim_molt = 10; //numero di molteplicita studiate
     double molteplicita_studiate[] = {3,5,7,9,11,15,20,30,40,50}; //tiene conto delle molteplicita che vogliamo analizzare con i grafici
@@ -79,8 +80,8 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5){
     char nome[30];
     char titolo[50];
 
-    //loop sull'array di molteplicita studiate per creare gli istogrammi di deltaZ per
-    //singole molteplicita
+    //loop sull'array di molteplicita' studiate per creare gli istogrammi di deltaZ per
+    //singole molteplicita' ed inizializzare le gaussiane
     for (int i=0;i<dim_molt;i++) {
         sprintf(nome,"fixed molt %f",molteplicita_studiate[i]);
         sprintf(titolo,"Residui - molteplicita' fissata a %f",molteplicita_studiate[i]);
@@ -267,6 +268,8 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5){
     c2->Divide(5,2);
     for(int i=0;i<dim_molt;i++) {
         c2->cd(i+1);
+        histo_molt[i]->Fit("gaus");
+        gStyle->SetOptFit(1);
         histo_molt[i]->DrawCopy("pe");
     }
 

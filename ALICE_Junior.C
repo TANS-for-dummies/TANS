@@ -26,11 +26,11 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
     //Settaggi input e output
     int N_false_hit = 0;
     const char* input_file = "kinem.root";
-    int N = 30;
+    int N = 55;
     const char* output_file = "MonteCarlo.root";
-    //double Theta_Multi = (1/TMath::Sqrt2())*0.001; //rad
-    double Theta_Multi_Be = 13.6*4*TMath::Sqrt(0.08*1.85/65.19)*(1+0.038*TMath::Log(0.08*1.85/65.19))/(3.*pow(10,13));
-    double Theta_Multi_Si = 13.6*14*TMath::Sqrt(0.02*2.33/22.0)*(1+0.038*TMath::Log(0.02*2.33/22.0))/(3.*pow(10,13));
+    double Theta_Multi = (TMath::Sqrt2())*0.001; //rad
+    //double Theta_Multi_Be = 13.6*4*TMath::Sqrt(0.08*1.85/65.19)*(1+0.038*TMath::Log(0.08*1.85/65.19))/(3.*pow(10,13));
+    //double Theta_Multi_Si = 13.6*14*TMath::Sqrt(0.02*2.33/21.8)*(1+0.038*TMath::Log(0.02*2.33/21.8))/(3.*pow(10,13));
 
     //Avviamo il timer	
     TStopwatch timer;
@@ -95,9 +95,9 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
 
 
 	//Rivelatori
-	Rivelatore Beam_Pipe(3, 0.08,52, Theta_Multi_Be); //H=52 per contenere tutte le particelle generate con l'accettanza data
-	Rivelatore Layer1(4, 0.02, 27, Theta_Multi_Si);
-	Rivelatore Layer2(7, 0.02, 27, Theta_Multi_Si);
+	Rivelatore Beam_Pipe(3, 0.08,52, Theta_Multi); //H=52 per contenere tutte le particelle generate con l'accettanza data
+	Rivelatore Layer1(4, 0.02, 27, Theta_Multi);
+	Rivelatore Layer2(7, 0.02, 27, Theta_Multi);
     
 
     // Definiamo una struct 

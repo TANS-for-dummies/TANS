@@ -16,7 +16,7 @@
 void Studia_DeltaPhi(){
 
     //Creiamo un istogramma per i deltaPhi
-    TH1D* histo_phi = new TH1D("histo_phi", "Istogramma delle phi", 250, -3.2, 3.2);
+    TH1D* histo_phi = new TH1D("histo_phi", "Istogramma delle phi", 100, -0.01, 0.01);
 
     // definizione struct
     typedef struct {
