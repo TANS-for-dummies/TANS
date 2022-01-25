@@ -25,7 +25,7 @@ Rivelatore& Rivelatore::operator=(const Rivelatore& source){
 }
 
 Particella Rivelatore::MultiScattering(Particella *part, MyRandom *ptr){
-    //La particella è considerata descritta da 2 angoli
+    //La particella e' considerata descritta da 2 angoli
     double ThetaP = ptr -> Gaus(0,dmTheta); 
     double PhiP = ptr -> Rndm()*2.*TMath::Pi();
 
@@ -54,7 +54,9 @@ Particella Rivelatore::MultiScattering(Particella *part, MyRandom *ptr){
         }
     }
     double final_theta = TMath::ACos(final_dir[2]);
-    double final_phi = TMath::ACos(final_dir[0]/(TMath::Sin(final_theta)));
+    double final_phi;
+    if(final_dir[1]>=0.) final_phi=TMath::ACos(final_dir[0]/(TMath::Sin(final_theta)));
+    else final_phi=2.*TMath::Pi()-TMath::ACos(final_dir[0]/(TMath::Sin(final_theta)));
     return Particella(final_theta,final_phi);
 }
 
