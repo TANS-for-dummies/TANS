@@ -18,9 +18,10 @@
 
 using std::vector;
 
-void Ricostruzione_Vertice(int dim = 36, double window = 0.5){ 
+void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){ 
     //dim = 36: dimensione minima dei TClonesArray
     //window in cm
+    //n_sigma: numero di deviazioni standard considerate per il taglio sulla Z
 
     //Costanti
     double pi_greco = TMath::Pi();
@@ -29,6 +30,7 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5){
     double r1 = 4.; //cm
     double r2 = 7.; //cm
     double delta_phi = 0.005; //ampiezza angolare in rad entro cui cercare corrispondenza hit
+    double sigma_Z = 5.3; //cm (deviazione standard della generazione delle Z)
     
     const int dim_molt = 10; //numero di molteplicita studiate
     double molteplicita_studiate[] = {3,5,7,9,11,15,20,30,40,50}; //tiene conto delle molteplicita che vogliamo analizzare con i grafici
@@ -121,143 +123,152 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5){
             std::cout << "Segnale " << j+1 << ") z, phi = " << tst->GetZ() << "; " << tst->GetPhi() << std::endl;
         }
         */
+        
+        //Controlliamo che le Z generate siano entro n_sigma
+        if(inizio.z < (n_sigma*sigma_Z)){
+        
+           for(int j=0; j<riv_1->GetEntries(); j++){ //for sul layer 1
+                Segnale* interazione1 = (Segnale*)riv_1->At(j);
+                tr->SetZ1(interazione1->GetZ());
 
-       for(int j=0; j<riv_1->GetEntries(); j++){ //for sul layer 1
-            Segnale* interazione1 = (Segnale*)riv_1->At(j);
-            tr->SetZ1(interazione1->GetZ());
+                for(int k=0; k<riv_2->GetEntries(); k++){  //for sul layer 2
+                    Segnale* interazione2 = (Segnale*)riv_2->At(k);
 
-            for(int k=0; k<riv_2->GetEntries(); k++){  //for sul layer 2
-                Segnale* interazione2 = (Segnale*)riv_2->At(k);
-
-                if( (interazione1->GetPhi() - interazione2->GetPhi()) <= delta_phi ){
-                    tr->SetZ2(interazione2->GetZ());
-                    histo_z->Fill(tr->Intersezione());
-                    vec_z.push_back(tr->Intersezione()); //riempiamo il vector
-                }
-           }
-       }
-        
-        //histo_z->DrawCopy();
-        
-        sort(vec_z.begin(), vec_z.end()); //riordiniamo il vector in ordine crescente
-        
-
-        /*
-        int max_bin = histo_z->GetMaximumBin(); //bin con massimo numero di conteggi 
-        double min_edge = histo_z->GetBinLowEdge(max_bin); //estremo inferiore del bin considerato 
-        double max_edge = min_edge + histo_z->GetBinWidth(max_bin); //estremo superiore del bin considerato 
-        
-        //Calcoliamo una media dei conteggi nei bin non nulli, la useremo per fare un controllo sul vertice
-        int count_hist = 0;
-        double media_hist = 0.;
-        for(int j=0; j<histo_z->GetNbinsX(); j++){
-            if(histo_z->GetBinContent(j+1)>0) {
-                media_hist = media_hist + histo_z->GetBinContent(j+1);
-                count_hist++;
-            }
-        }
-        
-        if(count_hist != 0) media_hist = media_hist/count_hist;
-        */
-        
-        int vec_dim = vec_z.size();
-        
-        bool Rec = 1; //indica che riusciamo a ricostruire il vertice
-        
-        //running window: scorriamo il vector cercando la finestra con il maggior numero di conteggi
-        int j_max = 0; //inizio della finestra contenente il massimo numero di conteggi
-        int conteggi_max = 0; //tiene conto dei conteggi nella fienstra contenente il picco
-        for(int j=0; j<vec_dim; j++){
-            bool inside = 1; //verifica se si è all'interno della window
-            int k = j;
-            int conteggi_temp = 0; //tiene conto dei conteggi nella fienstra considerata di volta in volta
-            while(inside){
-                if( k<vec_dim && (vec_z.at(k)<=vec_z.at(j) + window) ){ //controllo di essere dentro la finestra e di non eccedere la dimensione del vector
-                    conteggi_temp++;
-                }
-                else inside = 0;
-                k++;
-            }
-            //cout << conteggi_temp << " in " << j << " che sta tra " << vec_z.at(j) << " e " << vec_z.at(j)+window << endl;
-
-            if(conteggi_temp > conteggi_max){
-                conteggi_max = conteggi_temp;
-                j_max = j;
-                Rec = 1;
-            }
-            else if(conteggi_temp == conteggi_max){
-                if( (vec_z.at(j) - vec_z.at(j_max)) < window ) {
-                    //cout << "Sono vicini " << vec_z.at(j) - vec_z.at(j_max) << " in " << vec_z.at(j_max) << endl;
+                    if( (interazione1->GetPhi() - interazione2->GetPhi()) <= delta_phi ){
+                        tr->SetZ2(interazione2->GetZ());
+                        histo_z->Fill(tr->Intersezione());
+                        vec_z.push_back(tr->Intersezione()); //riempiamo il vector
                     }
-                else Rec = 0; //non ricostruiamo il vertice
-            }
-        
-        }
-        
-        //cout << "Vertice tra " << vec_z.at(j_max) << " e " << vec_z.at(j_max)+window << endl;
+               }
+           }
 
-        double Z_rec=0.;
+            //histo_z->DrawCopy();
 
-        //calcoliamo la media
-        if(Rec && vec_dim != 1 && vec_dim != 0){
-            for(int j=j_max; j<(j_max+conteggi_max); j++){
-                Z_rec += vec_z.at(j)/(double)conteggi_max;
-            }
-        }   
-        else if(vec_dim==1){
-            Z_rec=vec_z.at(0);
-            //cout << "Z rec: " << Z_rec << endl;
+            sort(vec_z.begin(), vec_z.end()); //riordiniamo il vector in ordine crescente
 
-        }  
-        else Rec = 0;    
-        
-        //cout << "Z rec: " << Z_rec << endl;
-        //cout << "Z true: " << inizio.z << endl;
-        
-        /*
-        if(media_hist<histo_z->GetBinContent(max_bin)){
 
-            //Calcoliamo la media degli elementi presenti nel bin con massimo numero di conteggi
-            int count = 0;
-            double somma = 0;
-            for(int j=0; j<vec_dim; j++){
-                if(vec_z.at(j)>min_edge && vec_z.at(j)<max_edge) {
-                    somma = somma + vec_z.at(j);
-                    count++;
+            /*
+            int max_bin = histo_z->GetMaximumBin(); //bin con massimo numero di conteggi 
+            double min_edge = histo_z->GetBinLowEdge(max_bin); //estremo inferiore del bin considerato 
+            double max_edge = min_edge + histo_z->GetBinWidth(max_bin); //estremo superiore del bin considerato 
+
+            //Calcoliamo una media dei conteggi nei bin non nulli, la useremo per fare un controllo sul vertice
+            int count_hist = 0;
+            double media_hist = 0.;
+            for(int j=0; j<histo_z->GetNbinsX(); j++){
+                if(histo_z->GetBinContent(j+1)>0) {
+                    media_hist = media_hist + histo_z->GetBinContent(j+1);
+                    count_hist++;
                 }
             }
-        
-            if(count != 0) Z_rec = somma/count;  
-            Rec = 1;      
-            //std::cout << "Z rec: " << Z_rec << std::endl;  
 
-        }
-        
-        else if(vec_dim==1){
-            Z_rec=vec_z.at(0);
-            cout << "Z rec: " << Z_rec << endl;
+            if(count_hist != 0) media_hist = media_hist/count_hist;
+            */
 
-        } */     
-            
-        if(Rec) {
-            deltaZ->Fill((Z_rec-inizio.z)*10000);
-            
-            for(int j=0;j<dim_molt;j++)
-            if(inizio.molt==molteplicita_studiate[j]) {
-                histo_molt[j]->Fill((Z_rec-inizio.z)*10000);
-                eff[j]++;
+            int vec_dim = vec_z.size();
+
+            bool Rec = 1; //indica che riusciamo a ricostruire il vertice
+
+            //running window: scorriamo il vector cercando la finestra con il maggior numero di conteggi
+            int j_max = 0; //inizio della finestra contenente il massimo numero di conteggi
+            int conteggi_max = 0; //tiene conto dei conteggi nella fienstra contenente il picco
+            for(int j=0; j<vec_dim; j++){
+                bool inside = 1; //verifica se si è all'interno della window
+                int k = j;
+                int conteggi_temp = 0; //tiene conto dei conteggi nella fienstra considerata di volta in volta
+                while(inside){
+                    if( k<vec_dim && (vec_z.at(k)<=vec_z.at(j) + window) ){ //controllo di essere dentro la finestra e di non eccedere la dimensione del vector
+                        conteggi_temp++;
+                    }
+                    else inside = 0;
+                    k++;
+                }
+                //cout << conteggi_temp << " in " << j << " che sta tra " << vec_z.at(j) << " e " << vec_z.at(j)+window << endl;
+
+                //se troviamo una finestra con più conteggi del massimo precedente: aggiorniamo conteggi_max e j_max
+                if(conteggi_temp > conteggi_max){
+                    conteggi_max = conteggi_temp;
+                    j_max = j;
+                    Rec = 1; //tiene conto del fatto che Rec potrebbe essere messo a 0 se in precedenza abbiamo trovato due picchi troppo distanti tra loro
+                }
+
+                //se troviamo lo stesso numero di conteggi del massimo trovato in precedenza:
+                else if(conteggi_temp == conteggi_max){
+
+                    //se le due finestre sono distanti:
+                    if( (vec_z.at(j) - vec_z.at(j_max)) >= window ) {
+                        Rec = 0; //non ricostruiamo il vertice
+                        }
+                }
+
+            }
+
+            //cout << "Vertice tra " << vec_z.at(j_max) << " e " << vec_z.at(j_max)+window << endl;
+
+            double Z_rec=0.;
+
+            //calcoliamo la media
+            if(Rec && vec_dim != 1 && vec_dim != 0){
+                for(int j=j_max; j<(j_max+conteggi_max); j++){
+                    Z_rec += vec_z.at(j)/(double)conteggi_max;
+                }
+            }   
+            else if(vec_dim==1){
+                Z_rec=vec_z.at(0);
+                //cout << "Z rec: " << Z_rec << endl;
+
+            }  
+            else Rec = 0;    
+
+            //cout << "Z rec: " << Z_rec << endl;
+            //cout << "Z true: " << inizio.z << endl;
+
+            /*
+            if(media_hist<histo_z->GetBinContent(max_bin)){
+
+                //Calcoliamo la media degli elementi presenti nel bin con massimo numero di conteggi
+                int count = 0;
+                double somma = 0;
+                for(int j=0; j<vec_dim; j++){
+                    if(vec_z.at(j)>min_edge && vec_z.at(j)<max_edge) {
+                        somma = somma + vec_z.at(j);
+                        count++;
+                    }
+                }
+
+                if(count != 0) Z_rec = somma/count;  
+                Rec = 1;      
+                //std::cout << "Z rec: " << Z_rec << std::endl;  
+
+            }
+
+            else if(vec_dim==1){
+                Z_rec=vec_z.at(0);
+                cout << "Z rec: " << Z_rec << endl;
+
+            } */     
+
+            if(Rec) {
+                deltaZ->Fill((Z_rec-inizio.z)*10000);
+
+                for(int j=0;j<dim_molt;j++)
+                if(inizio.molt==molteplicita_studiate[j]) {
+                    histo_molt[j]->Fill((Z_rec-inizio.z)*10000);
+                    eff[j]++;
+                }
+
+            }
+
+            for(int j=0;j<dim_molt;j++) {
+                if(inizio.molt==molteplicita_studiate[j]) conta_molt[j]++;
             }
         
-        }
-
-        for(int j=0;j<dim_molt;j++) {
-            if(inizio.molt==molteplicita_studiate[j]) conta_molt[j]++;
-        }
-        
-       //Reset dell'istogramma e clear del vector
-       histo_z->Reset();
-       vec_z.clear(); 
-    }
+           //Reset dell'istogramma e clear del vector
+           histo_z->Reset();
+           vec_z.clear(); 
+        }  
+    } //chiusura del for sugli eventi
+    
     for(int i=0;i<dim_molt;i++) {
         eff[i]=eff[i]/conta_molt[i];
     }
