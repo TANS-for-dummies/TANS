@@ -134,7 +134,7 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
                 for(int k=0; k<riv_2->GetEntries(); k++){  //for sul layer 2
                     Segnale* interazione2 = (Segnale*)riv_2->At(k);
 
-                    if( (interazione1->GetPhi() - interazione2->GetPhi()) <= delta_phi ){
+                    if( TMath::Abs( (interazione1->GetPhi() - interazione2->GetPhi()) ) <= delta_phi ){
                         tr->SetZ2(interazione2->GetZ());
                         histo_z->Fill(tr->Intersezione());
                         vec_z.push_back(tr->Intersezione()); //riempiamo il vector
