@@ -18,19 +18,15 @@
 
 
 
-void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int seed = 125) {
+void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root", int gen = 1, bool scat = 1, int N_false_hit = 0, unsigned int seed = 125) {
 	
     //Costanti
     double pi_greco = TMath::Pi();
+    double Theta_Multi = (TMath::Sqrt2())*0.001; //rad
     
     //Settaggi input e output
-    int N_false_hit = 0;
     const char* input_file = "kinem.root";
-    int N = 55;
-    const char* output_file = "MonteCarlo.root";
-    double Theta_Multi = (TMath::Sqrt2())*0.001; //rad
-    //double Theta_Multi_Be = 13.6*4*TMath::Sqrt(0.08*1.85/65.19)*(1+0.038*TMath::Log(0.08*1.85/65.19))/(3.*pow(10,13));
-    //double Theta_Multi_Si = 13.6*14*TMath::Sqrt(0.02*2.33/21.8)*(1+0.038*TMath::Log(0.02*2.33/21.8))/(3.*pow(10,13));
+  
 
     //Avviamo il timer	
     TStopwatch timer;
@@ -49,6 +45,7 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
     delete gRandom;
     gRandom = ptr;
 
+    //Controlliamo che il file di input con le distribuzioni venga caricato correttamente
     if (ptr->GetFlag()) {
     	ofs << "File con le distribuzioni non trovato" << std::endl; 
     	return;
@@ -57,16 +54,23 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
 
     //Creazione del funtore per scegliere la molteplicita'
     int dim = 0;
+    int N;
     int (MyRandom::*rndm_molt) (int); 
-    if(gen == 1) {
+    if(gen == 1) { //distribuzione estratta da grafico fornito
         rndm_molt = &MyRandom::RndMolt;
         dim = 36; //68.27% di 53 (massimo valore della molteplicità)
         }
-    else if (gen == 2) {
+    else if (gen == 2) { //distribuzione uniforme
+	std::cout << "Numero massimo di particelle generabile con distribuzione uniforme:" << std::endl;    
+	std::cin >> N;
+	std::cout << std::endl;    
         rndm_molt = &MyRandom::RndMolt_unif;
         dim = N/2 +1;
         }
-    else if (gen == 3) {
+    else if (gen == 3) { //distribuzione fissa
+	std::cout << "Numero di particelle da generare:" << std::endl;    
+	std::cin >> N;
+	std::cout << std::endl; 
         rndm_molt = &MyRandom::RndMolt_fissa;
         dim = N;
         }
@@ -94,13 +98,13 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
     
 
 
-	//Rivelatori
-	Rivelatore Beam_Pipe(3, 0.08,52, Theta_Multi); //H=52 per contenere tutte le particelle generate con l'accettanza data
-	Rivelatore Layer1(4, 0.02, 27, Theta_Multi);
-	Rivelatore Layer2(7, 0.02, 27, Theta_Multi);
+    //Rivelatori
+    Rivelatore Beam_Pipe(3, 0.08,52, Theta_Multi); //H=52 per contenere tutte le particelle generate con l'accettanza data
+    Rivelatore Layer1(4, 0.02, 27, Theta_Multi);
+    Rivelatore Layer2(7, 0.02, 27, Theta_Multi);
     
 
-    // Definiamo una struct 
+    //Definiamo una struct che contenga le caratteristiche del vertice (coordinate e molteplicita') 
     typedef struct{
         double x, y, z;
         int molt;
@@ -115,13 +119,13 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
     tree->SetAutoSave(0); //Rimuove backup cycle
     
 
-    //Creiamo una particella (fuori dal for cosi viene creata una sola volta), sara descritta da 2 angoli
+    //Creiamo una particella (fuori dal for sul numero degli esperimenti, cosi viene creata una sola volta)
     Particella* part = new Particella();
 
     //Creiamo un hit temporaneo
     Punto* hit = new Punto();
     
-    
+    //for sul numero di esperimenti
     for(int k=0; k<N_esp; k++){
         //Iniziamo a generare il vertice, ci servono 3 coordinate e la molteplicita
         //Unita di misura della lunghezza = cm
@@ -135,6 +139,7 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
         int pos1 = 0;
         int pos2 = 0;
 
+	//for sul numero di particelle
         for(int i=0; i<inizio.molt; i++) {
             //Generiamo i prodotti nel vertice
             part->SetTheta(ptr->RndTheta());
@@ -142,15 +147,15 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
             if (k/1000 == 0){ofs << "Particella Numero " << i+1 << " : ( " << part->GetTheta() << " , " <<  part->GetPhi() << " )" << std::endl;}; 
             
             //Trasporto e multiscattering particella per particella
-
-            
-
+		
             //BEAM PIPE
             *hit = Beam_Pipe.Hit(Punto(inizio.x, inizio.y, inizio.z), part);
             *part = (Beam_Pipe.*rndm_scatt)(part, ptr);
             
             //LAYER 1
             *hit = Layer1.Hit(*hit, part);
+		
+	    //Controlliamo che la z del vertice sia all'interno del rivelatore
             if (TMath::Abs(hit -> GetZ())>((Layer1.GetH())/2.)){}
             else{
 
@@ -162,8 +167,11 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
 
                 //LAYER 2
                 *hit = Layer2.Hit(*hit, part);
+		    
+	        //Controlliamo che la z del vertice sia all'interno del rivelatore
                 if(TMath::Abs(hit -> GetZ())>((Layer2.GetH())/2.)){}
                 else{
+			
                     //Immagazziniamo lo smearing
                     new(hit2[pos2]) Segnale(Layer2.Smearing(hit, ptr, i+1));
                     pos2++;
@@ -171,7 +179,9 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
                 pos1++;
             }
 
-        }
+        } //chiusura del for sul numeri di particelle
+	    
+	    
 
         //Generazione dei false hit (uniformi in Z e phi)
         for(int i=0; i<N_false_hit; i++) {
@@ -180,19 +190,15 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
         }
 
         // Debug
-        printf("Entries nel TClonesArray: %d\n",riv_1->GetEntries());
+        //printf("Entries nel TClonesArray: %d\n",riv_1->GetEntries());
         for (int j=0; j<hit1.GetEntries(); j++){
         Segnale *tst = (Segnale*)hit1[j];
-        // Particella *tst=(Particella*)riv_1->At(j);
         if (k/1000 == 0){ofs <<"Particella "<<j+1<<") Z , phi = "<<tst->GetZ()<<"; "<<tst->GetPhi()<<std::endl;};
-        //delete tst;
         }
-        printf("Entries nel TClonesArray: %d\n",riv_2->GetEntries());
+        //printf("Entries nel TClonesArray: %d\n",riv_2->GetEntries());
         for (int j=0; j<hit2.GetEntries(); j++){
         Segnale *tst = (Segnale*)hit2[j];
-        //Particella *tst=(Particella*)riv_2->At(j);
         if (k/1000 == 0){ofs <<"Particella "<<j+1<<") Z , phi = "<<tst->GetZ()<<"; "<<tst->GetPhi()<<std::endl;};
-        //delete tst;
         }
         // fine del debug
         
@@ -203,18 +209,21 @@ void MonteCarlo(int N_esp = 1000000, int gen = 1, bool scat = 1, unsigned int se
         riv_2->Clear();
     }
 
-    // Save all objects in this file
+    //Salviamo i dati sul file di output 
     Ofile.Write();
     
-    // Close the file. 
+    //Chiudiamo il file di output
     Ofile.Close();
     
     timer.Stop();
     timer.Print();
 
+    //Scriviamo sul file log
     ofs << "RAM utilizzata: " << gSystem->GetProcInfo(proc) << std::endl;
 	
+    //Chiudiamo il file log	
     ofs.close();
+	
     delete part;
     delete hit;
 
