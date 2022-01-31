@@ -136,7 +136,7 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
 
                     if( TMath::Abs( (interazione1->GetPhi() - interazione2->GetPhi()) ) <= delta_phi ){
                         tr->SetZ2(interazione2->GetZ());
-                        histo_z->Fill(tr->Intersezione());
+                        histo_z->Fill(tr->Intersezione()); //riempiamo l'istogramma con le intersezioni tra tracklet e asse del fascio 
                         vec_z.push_back(tr->Intersezione()); //riempiamo il vector
                     }
                }
