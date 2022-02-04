@@ -133,7 +133,7 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
         */
         
         //Controlliamo che le Z generate siano entro n_sigma
-        if(inizio.z < (n_sigma*sigma_Z)){
+        if(TMath::Abs(inizio.z) < (n_sigma*sigma_Z)){
         
            for(int j=0; j<riv_1->GetEntries(); j++){ //for sul layer 1
                 Segnale* interazione1 = (Segnale*)riv_1->At(j);
@@ -240,7 +240,7 @@ bool rec_hist(TH1D *h,vector<double> vec,double Z) {
     if(count_hist != 0) media_hist = media_hist/count_hist;
     int vec_dim = vec.size();
 
-    if(media_hist<h->GetBinContent(max_bin)){
+    if(media_hist < h->GetBinContent(max_bin)){
         //Calcoliamo la media degli elementi presenti nel bin con massimo numero di conteggi
         int count = 0;
         double somma = 0;
@@ -296,15 +296,12 @@ bool running_window_1(vector<double> vec,double window,double &Z) {
         }
         
     }
-    if(stato_rec && vec_dim != 1 && vec_dim != 0){
+    if(stato_rec && vec_dim != 0){
         for(int j=j_max; j<(j_max+conteggi_max); j++){
             Z += vec.at(j)/(double)conteggi_max;
         }
     }   
-    else if(vec_dim==1){
-        Z=vec.at(0);
-        //cout << "Z rec: " << Z << endl;
-    }  
+  
     else stato_rec = 0;    
     
     return stato_rec;
