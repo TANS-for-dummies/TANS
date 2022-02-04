@@ -22,7 +22,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 	
     //Costanti
     double pi_greco = TMath::Pi();
-    double Theta_Multi = (TMath::Sqrt2())*0.001; //rad
+    double Theta_Multi = 0.001/(TMath::Sqrt2()); //rad
     
     //Settaggi input e output
     const char* input_file = "kinem.root";
