@@ -64,19 +64,23 @@ Segnale Rivelatore:: Smearing(Punto *P, MyRandom *ptr, int Num_part){
 
     double z = P->GetZ() + ptr->Gaus(0,0.012);
     double temp_phi = 0;
-
+    
+    if(P->GetY()>=0.) temp_phi = TMath::ACos(P->GetX()/P->GetRadiusXY());
+    else temp_phi = 2.*TMath::Pi() - TMath::ACos(P->GetX()/P->GetRadiusXY());
+    
+    /*
     //Arcotangente con Phi tra 0 e 2Pi
     if(P->GetX()==0. && P->GetY()>0.) temp_phi = TMath::Pi()/2.;
-    else if(P->GetX()==0. && P->GetY()<0.) temp_phi = -1.*TMath::Pi()/2.;
+    else if(P->GetX()==0. && P->GetY()<0.) temp_phi = 3*TMath::Pi()/2.;
     else if(P->GetX()>0.) temp_phi=TMath::ATan(P->GetY()/P->GetX());
     else if(P->GetX()<0.) temp_phi=TMath::ATan(P->GetY()/P->GetX())+TMath::Pi();
     else temp_phi = 0.;
-
+    */
     double phi = temp_phi + (ptr->Gaus(0,0.003))/P->GetRadiusXY();
 
-    //Controllo che Phi sia dentro l'intervallo giusto
-    if(phi<0.) phi+=2.*TMath::Pi();
-    else if(phi>2.*TMath::Pi()) phi-=2.*TMath::Pi();
+    //Controllo che Phi rimanga dentro l'intervallo giusto anche dopo lo smearing
+    if(phi<0.) phi += 2.*TMath::Pi();
+    else if(phi>2.*TMath::Pi()) phi -= 2.*TMath::Pi();
 
     Segnale temp(z,phi,Num_part);
 
