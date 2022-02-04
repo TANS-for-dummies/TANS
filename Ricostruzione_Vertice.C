@@ -9,6 +9,7 @@
 #include "TTree.h"
 #include "TBranch.h"
 #include "TMath.h"
+#include "TStopwatch.h"
 #include "TClonesArray.h"
 #include "TH1D.h"
 #include "TStyle.h"
@@ -19,8 +20,9 @@
 using std::vector;
 
 bool running_window_1(vector<double>, double, double&); //Non gli piacciono i bool per reference quindi lo mettiamo come return e passiamo per reference Zrec
-//bool running_window_2(vector<double>, double, double&);
+bool running_window_2(vector<double>, double, double&);
 bool rec_hist(TH1D* , vector<double>, double&);
+double media(vector<double>,int,double);
 
 void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){ 
     //dim = 36: dimensione minima dei TClonesArray
@@ -33,7 +35,7 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
     //Settaggi
     double r1 = 4.; //cm
     double r2 = 7.; //cm
-    double delta_phi = 0.005; //ampiezza angolare in rad entro cui cercare corrispondenza hit
+    double delta_phi = 0.004; //ampiezza angolare in rad entro cui cercare corrispondenza hit
     double sigma_Z = 5.3; //cm (deviazione standard della generazione delle Z)
     
     const int dim_molt = 10; //numero di molteplicita studiate
@@ -42,6 +44,10 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
     //double molt_max[] = {3.5,5.5,7.5,9.5,11.5,16.5,22.5,34.5,44.5,54.5};
     double molt_min[] = {2.5,4.5,6.5,8.5,10.5,14.5,19.5,29.5,39.5,49.5};//Minimo e massimo degli intevalli di molteplicita' studiati
     double molt_max[] = {3.5,5.5,7.5,9.5,11.5,15.5,20.5,30.5,40.5,50.5};
+
+    //Avviamo il timer	
+    TStopwatch timer;
+    timer.Start();
 
     // definizione struct
     typedef struct {
@@ -95,7 +101,7 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
     for (int i=0;i<dim_molt;i++) {
         sprintf(nome,"fixed molt center %f",molteplicita_studiate[i]);
         sprintf(titolo,"Residui - molteplicita' fissata da %f a %f",molt_min[i],molt_max[i]);
-        histo_molt[i] = new TH1D(nome,titolo,300,-1000,1000);
+        histo_molt[i] = new TH1D(nome,titolo,400,-1000,1000);
         histo_molt[i]->GetXaxis()->SetTitle("Zrec-Zvera [#mum]");
         histo_molt[i]->SetMarkerStyle(33);
     }
@@ -160,11 +166,11 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
 
             double Z_rec = 0;
             //Rec=rec_hist(histo_z, vec_z, Z_rec);//Ricostruzione con metodo dell'istogramma
-            Rec=running_window_1(vec_z, window, Z_rec);//Ricostruzione con metodo della running window versione 1
-            //Rec=running_window_2(vec_z, window, Z_rec);//Ricostruzione con metodo della running window versione 2
+            //Rec=running_window_1(vec_z, window, Z_rec);//Ricostruzione con metodo della running window versione 1
+            Rec=running_window_2(vec_z, window, Z_rec);//Ricostruzione con metodo della running window versione 2
 
             //cout << "Z rec: " << Z_rec << endl;
-            //cout << "Z true: " << inizio.z << endl;
+            //cout << "Residuo: " << (Z_rec-inizio.z)*10000 << endl;
 
             if(Rec) {
                 deltaZ->Fill((Z_rec-inizio.z)*10000);
@@ -216,7 +222,8 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
     efficienza->SetMarkerColor(97);
     efficienza->Draw("APC");
     
-   
+    timer.Stop();
+    timer.Print();
 }
 
 bool rec_hist(TH1D *h,vector<double> vec,double Z) {
@@ -240,7 +247,7 @@ bool rec_hist(TH1D *h,vector<double> vec,double Z) {
     if(count_hist != 0) media_hist = media_hist/count_hist;
     int vec_dim = vec.size();
 
-    if(media_hist < h->GetBinContent(max_bin)){
+    if(media_hist<h->GetBinContent(max_bin)){
         //Calcoliamo la media degli elementi presenti nel bin con massimo numero di conteggi
         int count = 0;
         double somma = 0;
@@ -301,35 +308,69 @@ bool running_window_1(vector<double> vec,double window,double &Z) {
             Z += vec.at(j)/(double)conteggi_max;
         }
     }   
-  
     else stato_rec = 0;    
     
     return stato_rec;
 }
-/*
+
 bool running_window_2(vector<double> vec,double window,double &Z) {
 
-    int vec_dim = vec.size();
-    double step = 1.5;
-    int cmax = 0;
+    bool stato_rec = 1;
+    double step = 0.15;
+    int c_max = 0;
+    double Z_max = 0; //media delle Zrec nella window con conteggio massimo
+    double k_start = 0;
 
-    double z_0 = vec.at(0);
+    if(vec.empty()) return 0;
+    else {
+        double z_0 = vec.at(0);
+        int vec_dim = vec.size();
+        for(int j=0; vec.at(vec_dim-1) > z_0 + j*step; j++){
 
+            bool inside = 1;
+            bool start_window = 1; //ci serve per salvare l'indice del primo elemento del vector che entra nella finestra
+            int c = 0;
+            int k = k_start;
 
-    for(int j=0; vec.at(vec.end()) < z_0 + j*step + window; j++){
+            while((k < vec_dim) && (inside)){
+                if((vec.at(k) >= z_0 + j*step) && (vec.at(k) <= z_0 + j*step + window)){
+                    if(start_window) {
+                        k_start=k; //ci salva da dove partire a scorrere sul vector per la prossima finestra
+                        start_window = 0;
+                    }
+                    c++;
+                }
+                else if(vec.at(k) > z_0 + j*step) inside = 0;
+                k++;
+            }
 
-        bool inside = 1;
-        int c = 0;
-
-        while(inside){
-
+            if(c>c_max) {
+                c_max = c;
+                Z_max = media(vec,k_start,z_0 + j*step + window);
+                stato_rec = 1;
+            }
+            else if(c==c_max){
+                double temp_Z = media(vec,k_start,z_0 + j*step + window);
+                if(TMath::Abs(Z_max-temp_Z) > 0.15)  stato_rec = 0;
+            }
 
         }
 
-
+        Z=Z_max;
+        return stato_rec;
 
     }
+}
 
-    return Z;
+double media(vector<double> V,int j,double limite) {
 
-}*/
+    int vec_dim = V.size();
+    double temp = 0;
+    int count = 0;
+    for(int i=j; i<vec_dim && V.at(i)<=limite; i++) {
+        temp+=V.at(i);
+        count++;
+    }
+    return temp/(double)count;
+
+}
