@@ -16,11 +16,11 @@
 #include "TGraphErrors.h"
 #include "vector"
 #include "algorithm"
-#include "TFitResultPtr.h" //salva i dati di un fit
+#include "TF1"
 
 using std::vector;
 
-bool running_window_1(vector<double>, double, double&); //Non gli piacciono i bool per reference quindi lo mettiamo come return e passiamo per reference Zrec
+bool running_window_1(vector<double>, double, double&);
 bool running_window_2(vector<double>, double, double&);
 bool rec_hist(TH1D* , vector<double>, double&);
 double media(vector<double>,int,double);
@@ -84,9 +84,9 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
     vector<double> vec_z; 
     
 
-    //Creiamo gli istogrammi con cui analizzeremo l'efficienza del nostro algoritmo
+    //Creiamo gli istogrammi con cui analizzeremo la risoluzione del nostro algoritmo
     TH1D* deltaZ = new TH1D("deltaZ","Residui",200,-1000,1000);
-    deltaZ->GetXaxis()->SetTitle("Zrec-Zvera [#mum]");
+    deltaZ->GetXaxis()->SetTitle("Zrec-Zvera [µm]");
     deltaZ->SetMarkerStyle(22);
     deltaZ->SetMarkerColor(52);
     deltaZ->SetLineColor(kBlack);
@@ -158,66 +158,66 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
                         vec_z.push_back(tr->Intersezione()); //riempiamo il vector
                     }
                }
-           }
+           } //fine del loop sul TClonesArray
 
             //histo_z->DrawCopy();
 
             sort(vec_z.begin(), vec_z.end()); //riordiniamo il vector in ordine crescente
 
             bool Rec = 1; //indica che riusciamo a ricostruire il vertice
-
-            //cout << "Vertice tra " << vec_z.at(j_max) << " e " << vec_z.at(j_max)+window << endl;
-
             double Z_rec = 0;
+
             //Rec=rec_hist(histo_z, vec_z, Z_rec);//Ricostruzione con metodo dell'istogramma
             //Rec=running_window_1(vec_z, window, Z_rec);//Ricostruzione con metodo della running window versione 1
             Rec=running_window_2(vec_z, window, Z_rec);//Ricostruzione con metodo della running window versione 2
 
-            //cout << "Z rec: " << Z_rec << endl;
-            //cout << "Residuo: " << (Z_rec-inizio.z)*10000 << endl;
+            if(Rec) {deltaZ->Fill((Z_rec-inizio.z)*10000);}
 
-            if(Rec) {
-                deltaZ->Fill((Z_rec-inizio.z)*10000);
-
-                for(int j=0;j<dim_molt;j++)
+            for(int j=0;j<dim_molt;j++){
                 if((inizio.molt>molt_min[j])&&(inizio.molt<molt_max[j])) {
-                    histo_molt[j]->Fill((Z_rec-inizio.z)*10000);
-                    eff[j]++;
+                    conta_molt[j]++;
+                    if(Rec){
+                        histo_molt[j]->Fill((Z_rec-inizio.z)*10000);
+                        eff[j]++;
+                    }
                 }
-
-            }
-
-            for(int j=0;j<dim_molt;j++) {
-                if((inizio.molt>molt_min[j])&&(inizio.molt<molt_max[j])) conta_molt[j]++;
             }
         
            //Reset dell'istogramma e clear del vector
            histo_z->Reset();
            vec_z.clear(); 
-        }  
+        }  //chiusura if sulle z
     } //chiusura del for sugli eventi
-    
-    for(int i=0;i<dim_molt;i++) {
-        eff[i]=eff[i]/conta_molt[i];
-        s_molt[i]=(molt_max[i]-molt_min[i])/2.;
-        double temp_1 = TMath::Sqrt((1.-eff[i])*eff[i]/conta_molt[i]);//Errore binomiale
-        double temp_2 = 1./conta_molt[i];//Errore minimo
-        if(temp_1<temp_2)s_eff[i]=temp_2;
-        else s_eff[i]=temp_1;
-    }
 
     deltaZ->DrawCopy("pe");
 
     
     TCanvas* c2 = new TCanvas("c2","c2",80,80,1500,1000);
     c2->Divide(5,2);
+
     for(int i=0;i<dim_molt;i++) {
+        
+        //Calcolo efficienza e relativo errore
+        eff[i]=eff[i]/conta_molt[i];
+        s_molt[i]=(molt_max[i]-molt_min[i])/2.;
+        double temp_1 = TMath::Sqrt((1.-eff[i])*eff[i]/conta_molt[i]);//Errore binomiale
+        double temp_2 = 1./conta_molt[i];//Errore minimo
+        if(temp_1<temp_2)s_eff[i]=temp_2;
+        else s_eff[i]=temp_1;
+
+
+        //Fit delle gaussiane
         c2->cd(i+1);
-        TFitResultPtr param = histo_molt[i] -> Fit("gaus");
-        ris[i] = param -> Parameter(1);
-        s_ris[i] = param -> ParError(1);
-        gStyle->SetOptFit(1);
+        histo_molt[i] -> Fit("gaus");
+        TF1 *Gauss = histo_molt[i] -> GetFunction("gaus");
+        gStyle->SetOptFit(1111);
         histo_molt[i]->DrawCopy("pe");
+
+
+        //Calcolo della risoluzione
+        ris[i] = Gauss -> GetParameter(2);
+        s_ris[i] = Gauss -> GetParError(2);
+
     }
 
     //Efficienza
@@ -235,7 +235,7 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
     risoluzione = new TGraphErrors(dim_molt,molteplicita_studiate,ris,s_molt,s_ris);
     risoluzione->SetTitle("Risoluzione vs Molteplicita'");
     risoluzione->GetXaxis()->SetTitle("Molteplicita'");
-    risoluzione->GetYaxis()->SetTitle("Risoluzione");
+    risoluzione->GetYaxis()->SetTitle("Risoluzione (µm)");
     risoluzione->SetMarkerStyle(33);
     risoluzione->SetMarkerColor(77);
     risoluzione ->Draw ("APC");
@@ -386,7 +386,7 @@ bool running_window_2(vector<double> vec,double window,double &Z) {
                     }
                     c++;
                 }
-                else if(vec.at(k) > z_0 + j*step) inside = 0;
+                else if(vec.at(k) > z_0 + j*step + window) inside = 0;
                 k++;
             }
 
@@ -395,6 +395,7 @@ bool running_window_2(vector<double> vec,double window,double &Z) {
                 Z_max = media(vec,k_start,z_0 + j*step + window);
                 stato_rec = 1;
             }
+
             else if(c==c_max){
                 double temp_Z = media(vec,k_start,z_0 + j*step + window);
                 if(TMath::Abs(Z_max-temp_Z) > 0.15)  stato_rec = 0;
@@ -404,7 +405,6 @@ bool running_window_2(vector<double> vec,double window,double &Z) {
 
         Z=Z_max;
         return stato_rec;
-
     }
 }
 

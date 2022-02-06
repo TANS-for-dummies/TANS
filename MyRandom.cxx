@@ -4,7 +4,7 @@
 
 ClassImp(MyRandom)
 
-bool MyRandom::sFlag = false;
+bool MyRandom::sFlag = false; //Se True indica che il file in Input non è stato trovato
 
 //Costruttore di default
 MyRandom::MyRandom() : TRandom3() {

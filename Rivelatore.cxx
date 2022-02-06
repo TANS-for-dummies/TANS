@@ -5,7 +5,7 @@
 ClassImp(Rivelatore)
 
 //Costruttore di default
-Rivelatore::Rivelatore(): dmR(0.), dmS(0.), dmH(0.), dmTheta(1), TObject() {}
+Rivelatore::Rivelatore(): dmR(0.), dmS(0.), dmH(0.), dmTheta(0.), TObject() {}
 
 //Costruttore standard
 Rivelatore::Rivelatore(double r, double s, double H, double Theta): dmR(r), dmS(s), dmH(H), dmTheta(Theta), TObject() {}
@@ -24,9 +24,14 @@ Rivelatore& Rivelatore::operator=(const Rivelatore& source){
     return *this;
 }
 
+
+
 Particella Rivelatore::MultiScattering(Particella *part, MyRandom *ptr){
-    //La particella e' considerata descritta da 2 angoli
-    double ThetaP = ptr -> Gaus(0,dmTheta); 
+
+    //deviazione dalla direzione di entrata
+
+    double ThetaP = 0.;
+    do {ThetaP = ptr -> Gaus(0,dmTheta);} while(ThetaP<0); //vogliamo theta >=0 (il do serve per farlo eseguire almeno una volta)
     double PhiP = ptr -> Rndm()*2.*TMath::Pi();
 
     double mr[3][3];
@@ -40,7 +45,7 @@ Particella Rivelatore::MultiScattering(Particella *part, MyRandom *ptr){
     mr[1][2] = TMath::Sin(part->GetTheta())*TMath::Sin(part->GetPhi());
     mr[2][2] = TMath::Cos(part->GetTheta());
 
-    double scat[3];
+    double scat[3]; //coordinate cartesiane della deviazione (cioè della particella dopo il multiscattering, rispetto alla direzione iniziale)
     scat[0] = TMath::Sin(ThetaP)*TMath::Cos(PhiP);
     scat[1] = TMath::Sin(ThetaP)*TMath::Sin(PhiP);
     scat[2] = TMath::Cos(ThetaP);
@@ -53,8 +58,12 @@ Particella Rivelatore::MultiScattering(Particella *part, MyRandom *ptr){
             final_dir[i]+=mr[i][j]*scat[j];
         }
     }
+
+    //Coordinate della particella dopo il multiscattering nel sistema di riferimento di partenza 
     double final_theta = TMath::ACos(final_dir[2]);
     double final_phi;
+    
+    //final_phi è sempre ben definito poiche' se sin(theta) fosse 0 dovrei avere un punto del tipo (0,0,z) ossia sull'asse del fascio -> non possibile 
     if(final_dir[1]>=0.) final_phi=TMath::ACos(final_dir[0]/(TMath::Sin(final_theta)));
     else final_phi=2.*TMath::Pi()-TMath::ACos(final_dir[0]/(TMath::Sin(final_theta)));
     return Particella(final_theta,final_phi);
@@ -68,14 +77,7 @@ Segnale Rivelatore:: Smearing(Punto *P, MyRandom *ptr, int Num_part){
     if(P->GetY()>=0.) temp_phi = TMath::ACos(P->GetX()/P->GetRadiusXY());
     else temp_phi = 2.*TMath::Pi() - TMath::ACos(P->GetX()/P->GetRadiusXY());
     
-    /*
-    //Arcotangente con Phi tra 0 e 2Pi
-    if(P->GetX()==0. && P->GetY()>0.) temp_phi = TMath::Pi()/2.;
-    else if(P->GetX()==0. && P->GetY()<0.) temp_phi = 3*TMath::Pi()/2.;
-    else if(P->GetX()>0.) temp_phi=TMath::ATan(P->GetY()/P->GetX());
-    else if(P->GetX()<0.) temp_phi=TMath::ATan(P->GetY()/P->GetX())+TMath::Pi();
-    else temp_phi = 0.;
-    */
+    
     double phi = temp_phi + (ptr->Gaus(0,0.003))/P->GetRadiusXY();
 
     //Controllo che Phi rimanga dentro l'intervallo giusto anche dopo lo smearing

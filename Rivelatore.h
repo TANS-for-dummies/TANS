@@ -55,7 +55,7 @@ class Rivelatore : public TObject {
 		double dmR; //Raggio
 		double dmS; //Spessore
 		double dmH; //Lunghezza 
-		double dmTheta;    //Angolo planare medio di multiscattering
+		double dmTheta; //Angolo planare rms
 
 ClassDef(Rivelatore,1)
 };

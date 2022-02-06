@@ -1,9 +1,6 @@
 //Librerie custom
-#include "MyRandom.h"
-#include "Rivelatore.h"
-#include "Particella.h"
-#include "Segnale.h"
-#include "Punto.h"
+#include "Rivelatore.h" //le altre classi (MyRandom, Particella, Segnale e Punto) sono incluse in Rivelatore
+
 
 //Librerie
 #include "Riostream.h"
@@ -34,11 +31,6 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     
     //Apro il file di log
     std::ofstream ofs ("simulation_log.txt", std::ofstream::out);
-
-	
-    //Per monitorare la RAM
-    ProcInfo_t* proc = new ProcInfo_t();
-    ofs << "RAM utilizzata: " << gSystem->GetProcInfo(proc) << std::endl;
 
     //Generatore di numeri random
     MyRandom *ptr = new MyRandom(input_file,seed);
@@ -99,7 +91,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 
 
     //Rivelatori
-    Rivelatore Beam_Pipe(3, 0.08,52, Theta_Multi); //H=52 per contenere tutte le particelle generate con l'accettanza data
+    Rivelatore Beam_Pipe(3, 0.08, 52, Theta_Multi); //H=52 per contenere tutte le particelle generate con l'accettanza data
     Rivelatore Layer1(4, 0.02, 27, Theta_Multi);
     Rivelatore Layer2(7, 0.02, 27, Theta_Multi);
     
@@ -134,12 +126,12 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
         inizio.z = ptr->Gaus(0.,5.3);
         inizio.molt = (ptr->*rndm_molt)(N);
         
-	if (k/1000 == 0){ofs << "(" << inizio.x << ", "<<inizio.y << ", "<<inizio.z << ") e molteplicita " << inizio.molt << std::endl;};
+	    if (k/1000 == 0){ofs << "(" << inizio.x << ", "<<inizio.y << ", "<<inizio.z << ") e molteplicita " << inizio.molt << std::endl;};
 	
         int pos1 = 0;
         int pos2 = 0;
 
-	//for sul numero di particelle
+	    //for sul numero di particelle
         for(int i=0; i<inizio.molt; i++) {
             //Generiamo i prodotti nel vertice
             part->SetTheta(ptr->RndTheta());
@@ -155,9 +147,8 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
             //LAYER 1
             *hit = Layer1.Hit(*hit, part);
 		
-	    //Controlliamo che la z del vertice sia all'interno del rivelatore
-            if (TMath::Abs(hit -> GetZ())>((Layer1.GetH())/2.)){}
-            else{
+	        //Controlliamo che la z del vertice sia all'interno del rivelatore
+            if (TMath::Abs(hit -> GetZ())<=((Layer1.GetH())/2.)){
 
                 //Immagazziniamo lo smearing (coordinale cilindriche)
                 new(hit1[pos1]) Segnale(Layer1.Smearing(hit, ptr, i+1));
@@ -168,10 +159,8 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
                 //LAYER 2
                 *hit = Layer2.Hit(*hit, part);
 		    
-	        //Controlliamo che la z del vertice sia all'interno del rivelatore
-                if(TMath::Abs(hit -> GetZ())>((Layer2.GetH())/2.)){}
-                else{
-			
+	            //Controlliamo che la z del vertice sia all'interno del rivelatore
+                if(TMath::Abs(hit -> GetZ())<=((Layer2.GetH())/2.)){
                     //Immagazziniamo lo smearing
                     new(hit2[pos2]) Segnale(Layer2.Smearing(hit, ptr, i+1));
                     pos2++;
@@ -217,9 +206,6 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     
     timer.Stop();
     timer.Print();
-
-    //Scriviamo sul file log
-    ofs << "RAM utilizzata: " << gSystem->GetProcInfo(proc) << std::endl;
 	
     //Chiudiamo il file log	
     ofs.close();

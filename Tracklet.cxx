@@ -33,6 +33,6 @@ Tracklet& Tracklet::operator=(const Tracklet& source){
 //Funzione per trovare l'intersezione delle tracklets con l'asse del fascio
 double Tracklet::Intersezione(){
     double m = (dmR2-dmR1)/(dmZ2-dmZ1);
-    double z = -((1/m) * (dmR1 - m*dmZ1));
+    double z = -(dmR1 - m*dmZ1)/m;
     return z;
 }
