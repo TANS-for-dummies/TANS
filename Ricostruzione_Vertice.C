@@ -16,6 +16,7 @@
 #include "TGraphErrors.h"
 #include "vector"
 #include "algorithm"
+#include "TFitResultPtr.h" //salva i dati di un fit
 
 using std::vector;
 
@@ -106,12 +107,15 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
         histo_molt[i]->SetMarkerStyle(33);
     }
 
-    //Creiamo il grafico dell'efficienza
+    //Creiamo il grafico dell'efficienza e della risoluzione
     double s_molt[dim_molt] = {0.}; //array di errori per la molteplicita
     double eff[dim_molt] = {0.};
     double conta_molt[dim_molt] = {0.};//conta quanti eventi hanno una certa molteplicita fissata
     double s_eff[dim_molt] = {0.}; //array di errori per l'efficienza
+    double ris[dim_molt] = {0.}; //array per le risoluzioni prese dai fit
+    double s_ris[dim_molt] = {0.}; //array di errori sulla risoluzione 
     TGraphErrors *efficienza;
+    TGraphErrors *risoluzione;
 
 
 
@@ -203,16 +207,20 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
     }
 
     deltaZ->DrawCopy("pe");
+
     
     TCanvas* c2 = new TCanvas("c2","c2",80,80,1500,1000);
     c2->Divide(5,2);
     for(int i=0;i<dim_molt;i++) {
         c2->cd(i+1);
-        histo_molt[i]->Fit("gaus");
+        TFitResultPtr param = histo_molt[i] -> Fit("gaus");
+        ris[i] = param -> Parameter(1);
+        s_ris[i] = param -> ParError(1);
         gStyle->SetOptFit(1);
         histo_molt[i]->DrawCopy("pe");
     }
 
+    //Efficienza
     TCanvas* c3 = new TCanvas("c3","c3",80,80,775,500);
     efficienza = new TGraphErrors(dim_molt,molteplicita_studiate,eff,s_molt,s_eff);
     efficienza->SetTitle("Efficienza vs Molteplicita'");
@@ -221,10 +229,33 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
     efficienza->SetMarkerStyle(20);
     efficienza->SetMarkerColor(97);
     efficienza->Draw("APC");
-    
+
+    //Risoluzione
+    TCanvas* c4 = new TCanvas("c4","c4",80,80,775,500);
+    risoluzione = new TGraphErrors(dim_molt,molteplicita_studiate,ris,s_molt,s_ris);
+    risoluzione->SetTitle("Risoluzione vs Molteplicita'");
+    risoluzione->GetXaxis()->SetTitle("Molteplicita'");
+    risoluzione->GetYaxis()->SetTitle("Risoluzione");
+    risoluzione->SetMarkerStyle(33);
+    risoluzione->SetMarkerColor(77);
+    risoluzione ->Draw ("APC");
+
+
+
     timer.Stop();
     timer.Print();
 }
+
+
+
+
+
+
+
+
+
+
+
 
 bool rec_hist(TH1D *h,vector<double> vec,double Z) {
     
@@ -266,6 +297,14 @@ bool rec_hist(TH1D *h,vector<double> vec,double Z) {
     
     return stato_rec;
 }
+
+
+
+
+
+
+
+
 
 bool running_window_1(vector<double> vec,double window,double &Z) {
 
@@ -312,6 +351,13 @@ bool running_window_1(vector<double> vec,double window,double &Z) {
     
     return stato_rec;
 }
+
+
+
+
+
+
+
 
 bool running_window_2(vector<double> vec,double window,double &Z) {
 
@@ -361,6 +407,12 @@ bool running_window_2(vector<double> vec,double window,double &Z) {
 
     }
 }
+
+
+
+
+
+
 
 double media(vector<double> V,int j,double limite) {
 
