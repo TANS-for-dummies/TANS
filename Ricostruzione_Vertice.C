@@ -16,7 +16,7 @@
 #include "TGraphErrors.h"
 #include "vector"
 #include "algorithm"
-#include "TF1"
+#include "TF1.h"
 
 using std::vector;
 
