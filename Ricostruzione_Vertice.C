@@ -196,6 +196,14 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
                         eff[j]++;
                     }
                 }
+                
+                if(j<dim_Z && (inizio.z>(Z[j]-s_Z[j])) && (inizio.z<(Z[j]+s_Z[j]))) {
+                    conta_Z[j]++;
+                    if(Rec){
+                        //histo_molt[j]->Fill((Z_rec-inizio.z)*10000);
+                        eff_Z[j]++;
+                    }
+                }
             }
         
            //Reset dell'istogramma e clear del vector
@@ -210,32 +218,46 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
     TCanvas* c2 = new TCanvas("c2","c2",80,80,1500,1000);
     c2->Divide(5,2);
 
-    for(int i=0;i<dim_molt;i++) {
+    for(int i=0; i<TMath::Max(dim_molt, dim_Z); i++) {
         
-        //Calcolo efficienza e relativo errore
-        eff[i]=eff[i]/conta_molt[i];
-        s_molt[i]=(molt_max[i]-molt_min[i])/2.;
-        double temp_1 = TMath::Sqrt((1.-eff[i])*eff[i]/conta_molt[i]);//Errore binomiale
-        double temp_2 = 1./conta_molt[i];//Errore minimo
-        if(temp_1<temp_2)s_eff[i]=temp_2;
-        else s_eff[i]=temp_1;
+        if(i<dim_molt){
+        
+            //Calcolo efficienza e relativo errore
+            eff[i]=eff[i]/conta_molt[i];
+            s_molt[i]=(molt_max[i]-molt_min[i])/2.;
+            double temp_1 = TMath::Sqrt((1.-eff[i])*eff[i]/conta_molt[i]);//Errore binomiale
+            double temp_2 = 1./conta_molt[i];//Errore minimo
+            if(temp_1<temp_2)s_eff[i]=temp_2;
+            else s_eff[i]=temp_1;
 
 
-        //Fit delle gaussiane
-        c2->cd(i+1);
-        histo_molt[i] -> Fit("gaus");
-        TF1 *Gauss = histo_molt[i] -> GetFunction("gaus");
-        gStyle->SetOptFit(1111);
-        histo_molt[i]->DrawCopy("pe");
+            //Fit delle gaussiane
+            c2->cd(i+1);
+            histo_molt[i] -> Fit("gaus");
+            TF1 *Gauss = histo_molt[i] -> GetFunction("gaus");
+            gStyle->SetOptFit(1111);
+            histo_molt[i]->DrawCopy("pe");
 
 
-        //Calcolo della risoluzione
-        ris[i] = Gauss -> GetParameter(2);
-        s_ris[i] = Gauss -> GetParError(2);
+            //Calcolo della risoluzione
+            ris[i] = Gauss -> GetParameter(2);
+            s_ris[i] = Gauss -> GetParError(2);
+            
+        }    
+        
+        if(i<dim_Z) {
+            
+            //Calcolo efficienza e relativo errore
+            eff_Z[i]=eff_Z[i]/conta_Z[i];
+            double temp_1 = TMath::Sqrt((1.-eff_Z[i])*eff_Z[i]/conta_Z[i]);//Errore binomiale
+            double temp_2 = 1./conta_Z[i];//Errore minimo
+            if(temp_1<temp_2)s_eff_Z[i]=temp_2;
+            else s_eff_Z[i]=temp_1;
+        }   
 
     }
 
-    //Efficienza
+    //Efficienza in funzione della molteplicità
     TCanvas* c3 = new TCanvas("c3","c3",80,80,775,500);
     efficienza = new TGraphErrors(dim_molt,molteplicita_studiate,eff,s_molt,s_eff);
     efficienza->SetTitle("Efficienza vs Molteplicita'");
@@ -244,9 +266,22 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
     efficienza->SetMarkerStyle(20);
     efficienza->SetMarkerColor(97);
     efficienza->Draw("APC");
+    
+    //Efficienza in funzione di Z
+    TCanvas* c4 = new TCanvas("c4","c4",80,80,775,500);
+    efficienza_Z = new TGraphErrors(dim_Z, Z, eff_Z, s_Z, s_eff_Z);
+    efficienza_Z->SetTitle("Efficienza vs Z");
+    efficienza_Z->GetXaxis()->SetTitle("Z");
+    efficienza_Z->GetYaxis()->SetTitle("Efficienza");
+    efficienza_Z->SetMarkerStyle(20);
+    efficienza_Z->SetMarkerColor(97);
+    efficienza_Z->Draw("APC");
+    
+    
+    
 
     //Risoluzione
-    TCanvas* c4 = new TCanvas("c4","c4",80,80,775,500);
+    TCanvas* c5 = new TCanvas("c5","c5",80,80,775,500);
     risoluzione = new TGraphErrors(dim_molt,molteplicita_studiate,ris,s_molt,s_ris);
     risoluzione->SetTitle("Risoluzione vs Molteplicita'");
     risoluzione->GetXaxis()->SetTitle("Molteplicita'");
