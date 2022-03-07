@@ -107,7 +107,7 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
         histo_molt[i]->SetMarkerStyle(33);
     }
 
-    //Creiamo il grafico dell'efficienza e della risoluzione
+    //Creiamo il grafico dell'efficienza e della risoluzione in funzione della molteplicita'
     double s_molt[dim_molt] = {0.}; //array di errori per la molteplicita
     double eff[dim_molt] = {0.};
     double conta_molt[dim_molt] = {0.};//conta quanti eventi hanno una certa molteplicita fissata
@@ -116,6 +116,19 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
     double s_ris[dim_molt] = {0.}; //array di errori sulla risoluzione 
     TGraphErrors *efficienza;
     TGraphErrors *risoluzione;
+
+
+    //Creiamo il grafico dell'efficienza e della risoluzione in funzione di Z
+    int dim_Z = 15;
+    double Z[dim_Z] = {-12.6, -10.8, -9., -7.2, -5.4, -3.6, -1.8, 0., 1.8, 3.6, 5.4, 7.2, 9., 10.8, 12.6};
+    double s_Z[dim_Z] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5}; 
+    double eff_Z[dim_Z] = {0.};
+    double conta_Z[dim_Z] = {0.};//conta quanti eventi ci sono in un certo intervallo di Z
+    double s_eff_Z[dim_Z] = {0.}; //array di errori per l'efficienza
+    double ris_Z[dim_Z] = {0.}; //array per le risoluzioni prese dai fit
+    double s_ris_Z[dim_Z] = {0.}; //array di errori sulla risoluzione 
+    TGraphErrors *efficienza_Z;
+    TGraphErrors *risoluzione_Z;
 
 
 
@@ -173,8 +186,10 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
 
             if(Rec) {deltaZ->Fill((Z_rec-inizio.z)*10000);}
 
-            for(int j=0;j<dim_molt;j++){
-                if((inizio.molt>molt_min[j])&&(inizio.molt<molt_max[j])) {
+
+            //DA COMPLETARE 
+            for(int j=0; j<TMath::Max(dim_molt, dim_Z); j++){
+                if(j<dim_molt && (inizio.molt>molt_min[j]) && (inizio.molt<molt_max[j])) {
                     conta_molt[j]++;
                     if(Rec){
                         histo_molt[j]->Fill((Z_rec-inizio.z)*10000);
