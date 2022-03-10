@@ -449,6 +449,7 @@ bool running_window_2(vector<double> vec,double window,double &Z) {
             else if(c==c_max){
                 double temp_Z = media(vec,k_start,z_0 + j*step + window);
                 if(TMath::Abs(Z_max-temp_Z) > 0.15)  stato_rec = 0;
+                else Z_max = media(vec,k_start,z_0 + (j+1)*step + window);
             }
 
         }
