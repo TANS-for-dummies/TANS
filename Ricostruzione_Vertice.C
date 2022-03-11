@@ -415,6 +415,7 @@ bool running_window_2(vector<double> vec,double window,double &Z) {
     double step = 0.15;
     int c_max = 0;
     double Z_max = 0; //media delle Zrec nella window con conteggio massimo
+    double sigma_max = 0; //scarto quadratico medio nella window con conteggio massimo
     double k_start = 0;
 
     if(vec.empty()) return 0;
@@ -442,14 +443,20 @@ bool running_window_2(vector<double> vec,double window,double &Z) {
 
             if(c>c_max) {
                 c_max = c;
-                Z_max = media(vec,k_start,z_0 + j*step + window);
+                Z_max = media(vec, k_start, z_0 + j*step + window);
+                sigma_max = scarti(vec, k_start, z_0 + j*step + window, Z_max);
                 stato_rec = 1;
             }
 
             else if(c==c_max){
-                double temp_Z = media(vec,k_start,z_0 + j*step + window);
-                if(TMath::Abs(Z_max-temp_Z) > 0.15)  stato_rec = 0;
-                else Z_max = media(vec,k_start,z_0 + (j+1)*step + window);
+                double temp_Z = media(vec, k_start, z_0 + j*step + window);
+                double temp_sigma = scarti(vec, k_start, z_0 + j*step + window, Z_max);
+                //if(TMath::Abs(Z_max-temp_Z) > 0.15)  stato_rec = 0;
+                //else Z_max = media(vec,k_start,z_0 + j*step + window);
+                
+                //Prova con media delle distanze dalla media
+                
+                
             }
 
         }
@@ -477,3 +484,20 @@ double media(vector<double> V,int j,double limite) {
     return temp/(double)count;
 
 }
+
+
+//Scarto quadratico
+double scarti(vector<double> V,int j,double limite, double delta) {
+
+    int vec_dim = V.size();
+    double temp = 0;
+    int count = 0;
+    for(int i=j; i<vec_dim && V.at(i)<=limite; i++) {
+        temp = (V.at(i)-delta)*(V.at(i)-delta);
+        count++;
+    }
+    return temp/(double)count;
+
+}
+
+
