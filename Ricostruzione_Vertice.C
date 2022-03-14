@@ -66,7 +66,7 @@ void Ricostruzione_Vertice(char input = 'MonteCarlo.root', double window = 0.5, 
     TClonesArray *riv_2 = new TClonesArray("Segnale",dim);
  
     //Apertura file di input
-    TFile Input_file("MonteCarlo.root");
+    TFile Input_file(input);
 
     //Lettura TTree e branch
     TTree *tree = (TTree*)Input_file.Get("Tree");
@@ -102,13 +102,14 @@ void Ricostruzione_Vertice(char input = 'MonteCarlo.root', double window = 0.5, 
 
     //loop sull'array di molteplicita' studiate per creare gli istogrammi di deltaZ per
     //singole molteplicita' ed inizializzare le gaussiane
-    for (int i=0;i<dim_molt;i++) {
-        sprintf(nome,"fixed molt center %f",molteplicita_studiate[i]);
-        sprintf(titolo,"Residui - molteplicita' fissata da %f a %f",molt_min[i],molt_max[i]);
-        histo_molt[i] = new TH1D(nome,titolo,400,-1000,1000);
-        histo_molt[i]->GetXaxis()->SetTitle("Zrec-Zvera [#mum]");
-        histo_molt[i]->SetMarkerStyle(33);
+    for (int i=0;i<dim_molt; i++) {
+        sprintf(nome, "fixed molt center %f", molteplicita_studiate[i]);
+        sprintf(titolo,"Residui - molteplicita' fissata da %f a %f", molt_min[i], molt_max[i]);
+        histo_molt[i] = new TH1D(nome, titolo, 400, -1000, 1000);
+        histo_molt[i] -> GetXaxis() -> SetTitle("Zrec-Zvera [#mum]");
+        histo_molt[i] -> SetMarkerStyle(33);
     }
+    
 
     //Creiamo il grafico dell'efficienza e della risoluzione in funzione della molteplicita'
     double s_molt[dim_molt] = {0.}; //array di errori per la molteplicita
@@ -165,12 +166,12 @@ void Ricostruzione_Vertice(char input = 'MonteCarlo.root', double window = 0.5, 
             bool Rec = 1; //indica che riusciamo a ricostruire il vertice
             double Z_rec = 0;
 
-            Rec=running_window_2(vec_z, window, Z_rec);//Ricostruzione con metodo della running window versione 2
+            Rec = running_window(vec_z, window, Z_rec); //Ricostruzione con metodo della running window
 
-            if(Rec) {deltaZ->Fill((Z_rec-inizio.z)*10000);}
+            if(Rec) {deltaZ -> Fill((Z_rec-inizio.z)*10000);}
 
 
-            //DA COMPLETARE 
+            //DA COMPLETARE (?)
             for(int j=0; j<TMath::Max(dim_molt, dim_Z); j++){
                 if(j<dim_molt && (inizio.molt>molt_min[j]) && (inizio.molt<molt_max[j])) {
                     conta_molt[j]++;
@@ -240,6 +241,7 @@ void Ricostruzione_Vertice(char input = 'MonteCarlo.root', double window = 0.5, 
 
     }
 
+    
     //Efficienza in funzione della molteplicità
     TCanvas* c3 = new TCanvas("c3","c3",80,80,775,500);
     efficienza = new TGraphErrors(dim_molt,molteplicita_studiate,eff,s_molt,s_eff);
@@ -249,6 +251,7 @@ void Ricostruzione_Vertice(char input = 'MonteCarlo.root', double window = 0.5, 
     efficienza->SetMarkerStyle(20);
     efficienza->SetMarkerColor(97);
     efficienza->Draw("APC");
+    
     
     //Efficienza in funzione di Z
     TCanvas* c4 = new TCanvas("c4","c4",80,80,775,500);
@@ -261,8 +264,6 @@ void Ricostruzione_Vertice(char input = 'MonteCarlo.root', double window = 0.5, 
     efficienza_Z->Draw("APC");
     
     
-    
-
     //Risoluzione
     TCanvas* c5 = new TCanvas("c5","c5",80,80,775,500);
     risoluzione = new TGraphErrors(dim_molt,molteplicita_studiate,ris,s_molt,s_ris);
@@ -290,7 +291,7 @@ void Ricostruzione_Vertice(char input = 'MonteCarlo.root', double window = 0.5, 
 
 
 
-bool running_window_2(vector<double> vec,double window,double &Z) {
+bool running_window(vector<double> vec,double window,double &Z) {
 
     bool stato_rec = 1; //segna se il vertice è stato ricostruito o meno
     double step = window/2.; //di quanto si sposta la finestra ad ogni incremento
@@ -331,6 +332,7 @@ bool running_window_2(vector<double> vec,double window,double &Z) {
             }
 
             //Per ora in caso di parità viene solo tenuto il caso di finestre uguali vicine, bisogna ancora includere il caso di finestre distanti
+            //(basta rimuovere l'if)
             else if(c==c_max){
                 if(j - j_max = 1 && raddoppio = 0){
                     window = 2 * window;
