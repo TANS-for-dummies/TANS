@@ -25,13 +25,16 @@ bool running_window_2(vector<double>, double, double&);
 bool rec_hist(TH1D* , vector<double>, double&);
 double media(vector<double>,int,double);
 
-void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){ 
+void Ricostruzione_Vertice(char input = 'MonteCarlo.root', double window = 0.5, int n_sigma = 3, int dim = 36){ 
     //dim = 36: dimensione minima dei TClonesArray
     //window in cm
     //n_sigma: numero di deviazioni standard considerate per il taglio sulla Z
-
+    //input: nome del file in input (solo .root)
+    
+    
     //Costanti
     double pi_greco = TMath::Pi();
+    
 
     //Settaggi
     double r1 = 4.; //cm
@@ -136,24 +139,6 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
     // loop sugli ingressi nel TTree
     for(int i=0; i<tree->GetEntries(); i++){
         tree->GetEvent(i);
-        /*
-        std::cout << "Evento " << i+1 << "; Molteplicita= " << inizio.molt << std::endl;
-        std::cout << "X,Y,Z = " << inizio.x << "; " << inizio.y << "; " << inizio.z << std::endl;
-
-        int num = riv_1->GetEntries();
-        std::cout << "Numero di elementi nel primo TClonesArray " << num << std::endl;
-        for (int j=0; j<num; j++){
-            Segnale *tst=(Segnale*)riv_1->At(j);
-            std::cout << "Segnale " << j+1 << ") z, phi = " << tst->GetZ() << "; " << tst->GetPhi() << std::endl;
-        }
-
-        num = riv_2->GetEntries();
-        std::cout << "Numero di elementi nel secondo TClonesArray " << num << std::endl;
-        for (int j=0; j<num; j++){
-            Segnale *tst=(Segnale*)riv_2->At(j);
-            std::cout << "Segnale " << j+1 << ") z, phi = " << tst->GetZ() << "; " << tst->GetPhi() << std::endl;
-        }
-        */
         
         //Controlliamo che le Z generate siano entro n_sigma
         if(TMath::Abs(inizio.z) < (n_sigma*sigma_Z)){
@@ -180,8 +165,6 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
             bool Rec = 1; //indica che riusciamo a ricostruire il vertice
             double Z_rec = 0;
 
-            //Rec=rec_hist(histo_z, vec_z, Z_rec);//Ricostruzione con metodo dell'istogramma
-            //Rec=running_window_1(vec_z, window, Z_rec);//Ricostruzione con metodo della running window versione 1
             Rec=running_window_2(vec_z, window, Z_rec);//Ricostruzione con metodo della running window versione 2
 
             if(Rec) {deltaZ->Fill((Z_rec-inizio.z)*10000);}
@@ -307,116 +290,15 @@ void Ricostruzione_Vertice(int dim = 36, double window = 0.5, int n_sigma = 3){
 
 
 
-bool rec_hist(TH1D *h,vector<double> vec,double Z) {
-    
-    bool stato_rec=1;
-
-    int max_bin = h->GetMaximumBin(); //bin con massimo numero di conteggi 
-    double min_edge = h->GetBinLowEdge(max_bin); //estremo inferiore del bin considerato 
-    double max_edge = min_edge + h->GetBinWidth(max_bin); //estremo superiore del bin considerato
-
-    //Calcoliamo una media dei conteggi nei bin non nulli, la useremo per fare un controllo sul vertice
-    int count_hist = 0;
-    double media_hist = 0.;
-    for(int j=0; j<h->GetNbinsX(); j++){
-        if(h->GetBinContent(j+1)>0) {
-            media_hist = media_hist + h->GetBinContent(j+1);
-            count_hist++;
-        }
-    }
-
-    if(count_hist != 0) media_hist = media_hist/count_hist;
-    int vec_dim = vec.size();
-
-    if(media_hist<h->GetBinContent(max_bin)){
-        //Calcoliamo la media degli elementi presenti nel bin con massimo numero di conteggi
-        int count = 0;
-        double somma = 0;
-        for(int j=0; j<vec_dim; j++){
-            if(vec.at(j)>min_edge && vec.at(j)<max_edge) {
-                somma = somma + vec.at(j);
-                count++;
-            }
-        }
-        if(count != 0) Z = somma/count;       
-    }
-    else if(vec_dim==1){
-        Z=vec.at(0);
-    } 
-    else stato_rec = 0;
-    
-    return stato_rec;
-}
-
-
-
-
-
-
-
-
-
-bool running_window_1(vector<double> vec,double window,double &Z) {
-
-    bool stato_rec=1;
-
-    //running window: scorriamo il vector cercando la finestra con il maggior numero di conteggi
-    int vec_dim = vec.size();
-    int j_max = 0; //inizio della finestra contenente il massimo numero di conteggi
-    int conteggi_max = 0; //tiene conto dei conteggi nella fienstra contenente il picco
-    for(int j=0; j<vec_dim; j++){
-        bool inside = 1; //verifica se si e' all'interno della window
-        int k = j;
-        int conteggi_temp = 0; //tiene conto dei conteggi nella fienstra considerata di volta in volta
-        while(inside){
-            if( k<vec_dim && (vec.at(k)<=vec.at(j) + window) ){ //controllo di essere dentro la finestra e di non eccedere la dimensione del vector
-                conteggi_temp++;
-            }
-            else inside = 0;
-            k++;
-        }
-        //cout << conteggi_temp << " in " << j << " che sta tra " << vec_z.at(j) << " e " << vec_z.at(j)+window << endl;
-        //se troviamo una finestra con piu conteggi del massimo precedente: aggiorniamo conteggi_max e j_max
-        if(conteggi_temp > conteggi_max){
-            conteggi_max = conteggi_temp;
-            j_max = j;
-            stato_rec = 1; //tiene conto del fatto che Rec potrebbe essere messo a 0 se in precedenza abbiamo trovato due picchi troppo distanti tra loro
-        }
-        
-        //se troviamo lo stesso numero di conteggi del massimo trovato in precedenza:
-        else if(conteggi_temp == conteggi_max){
-            //se le due finestre sono distanti:
-            if( (vec.at(j) - vec.at(j_max)) >= window ) {
-                stato_rec = 0; //non ricostruiamo il vertice
-                }
-        }
-        
-    }
-    if(stato_rec && vec_dim != 0){
-        for(int j=j_max; j<(j_max+conteggi_max); j++){
-            Z += vec.at(j)/(double)conteggi_max;
-        }
-    }   
-    else stato_rec = 0;    
-    
-    return stato_rec;
-}
-
-
-
-
-
-
-
-
 bool running_window_2(vector<double> vec,double window,double &Z) {
 
-    bool stato_rec = 1;
-    double step = 0.15;
-    int c_max = 0;
+    bool stato_rec = 1; //segna se il vertice è stato ricostruito o meno
+    double step = window/2.; //di quanto si sposta la finestra ad ogni incremento
+    int c_max = 0; //conteggio massimo
     double Z_max = 0; //media delle Zrec nella window con conteggio massimo
-    double sigma_max = 0; //scarto quadratico medio nella window con conteggio massimo
-    double k_start = 0;
+    double k_start = 0; //lower bound della finestra
+    int j_max = 0; //numero della finestra con conteggio massimo
+    bool raddoppio = 0; //segna se è già stata raddoppiata la finestra una volta
 
     if(vec.empty()) return 0;
     else {
@@ -424,10 +306,10 @@ bool running_window_2(vector<double> vec,double window,double &Z) {
         int vec_dim = vec.size();
         for(int j=0; vec.at(vec_dim-1) > z_0 + j*step; j++){
 
-            bool inside = 1;
+            bool inside = 1; //segna se siamo dentro la finestra
             bool start_window = 1; //ci serve per salvare l'indice del primo elemento del vector che entra nella finestra
-            int c = 0;
-            int k = k_start;
+            int c = 0; //conteggio
+            int k = k_start; //salvaq l'inizio della finestra
 
             while((k < vec_dim) && (inside)){
                 if((vec.at(k) >= z_0 + j*step) && (vec.at(k) <= z_0 + j*step + window)){
@@ -444,18 +326,22 @@ bool running_window_2(vector<double> vec,double window,double &Z) {
             if(c>c_max) {
                 c_max = c;
                 Z_max = media(vec, k_start, z_0 + j*step + window);
-                sigma_max = scarti(vec, k_start, z_0 + j*step + window, Z_max);
                 stato_rec = 1;
+                j_max = j;
             }
 
+            //Per ora in caso di parità viene solo tenuto il caso di finestre uguali vicine, bisogna ancora includere il caso di finestre distanti
             else if(c==c_max){
-                double temp_Z = media(vec, k_start, z_0 + j*step + window);
-                double temp_sigma = scarti(vec, k_start, z_0 + j*step + window, Z_max);
-                //if(TMath::Abs(Z_max-temp_Z) > 0.15)  stato_rec = 0;
-                //else Z_max = media(vec,k_start,z_0 + j*step + window);
-                
-                //Prova con media delle distanze dalla media
-                
+                if(j - j_max = 1 && raddoppio = 0){
+                    window = 2 * window;
+                    j = 0;
+                    j_max = 0;
+                    c_max = 0;
+                    z_max = 0;
+                    k_start = 0;
+                    raddoppio = 1;
+                 else  stato_rec = 0;
+                }
                 
             }
 
@@ -484,20 +370,3 @@ double media(vector<double> V,int j,double limite) {
     return temp/(double)count;
 
 }
-
-
-//Scarto quadratico
-double scarti(vector<double> V,int j,double limite, double delta) {
-
-    int vec_dim = V.size();
-    double temp = 0;
-    int count = 0;
-    for(int i=j; i<vec_dim && V.at(i)<=limite; i++) {
-        temp = (V.at(i)-delta)*(V.at(i)-delta);
-        count++;
-    }
-    return temp/(double)count;
-
-}
-
-
