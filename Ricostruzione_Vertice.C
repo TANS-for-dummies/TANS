@@ -122,7 +122,7 @@ void Ricostruzione_Vertice(char input = 'MonteCarlo.root', double window = 0.5, 
 
 
     //Creiamo il grafico dell'efficienza e della risoluzione in funzione di Z
-    int dim_Z = 15;
+    const int dim_Z = 15;
     double Z[dim_Z] = {-12.6, -10.8, -9., -7.2, -5.4, -3.6, -1.8, 0., 1.8, 3.6, 5.4, 7.2, 9., 10.8, 12.6};
     double s_Z[dim_Z] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5}; 
     double eff_Z[dim_Z] = {0.};
