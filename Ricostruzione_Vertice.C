@@ -23,8 +23,7 @@ using std::vector;
 bool running_window(vector<double>, double, double&);
 double media(vector<double>,int,double);
 
-void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window = 0.5, int n_sigma = 3, int dim = 36){ 
-    //dim = 36: dimensione minima dei TClonesArray
+void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window = 0.5, int n_sigma = 3){ 
     //window in cm
     //n_sigma: numero di deviazioni standard considerate per il taglio sulla Z
     //input: nome del file in input (solo .root)
@@ -66,6 +65,12 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
     //Apertura file di input
     TFile Input_file(input);
 
+    //DA FINIRE!
+    //Lettura "Generazione"
+    TObject *obj = (TObject*)Input_file.Get("Generazione");
+    
+    
+    
     //Lettura TTree e branch
     TTree *tree = (TTree*)Input_file.Get("Tree");
     TBranch *b1 = tree->GetBranch("VertMult");
