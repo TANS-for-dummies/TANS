@@ -20,12 +20,10 @@
 
 using std::vector;
 
-bool running_window_1(vector<double>, double, double&);
-bool running_window_2(vector<double>, double, double&);
-bool rec_hist(TH1D* , vector<double>, double&);
+bool running_window(vector<double>, double, double&);
 double media(vector<double>,int,double);
 
-void Ricostruzione_Vertice(char input = 'MonteCarlo.root', double window = 0.5, int n_sigma = 3, int dim = 36){ 
+void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window = 0.5, int n_sigma = 3, int dim = 36){ 
     //dim = 36: dimensione minima dei TClonesArray
     //window in cm
     //n_sigma: numero di deviazioni standard considerate per il taglio sulla Z
