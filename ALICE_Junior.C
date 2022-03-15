@@ -43,6 +43,11 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     	return;
     }
 
+	
+    //Salviamo "Generazione"
+    TObject Generazione;
+	
+	
 
     //Creazione del funtore per scegliere la molteplicita'
     int dim = 0;
@@ -51,6 +56,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     if(gen == 1) { //distribuzione estratta da grafico fornito
         rndm_molt = &MyRandom::RndMolt;
         dim = 36; //68.27% di 53 (massimo valore della molteplicità)
+		Generazione.SetUniqueID(0);
         }
     else if (gen == 2) { //distribuzione uniforme
 	std::cout << "Numero massimo di particelle generabile con distribuzione uniforme:" << std::endl;    
@@ -58,6 +64,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 	std::cout << std::endl;    
         rndm_molt = &MyRandom::RndMolt_unif;
         dim = N/2 +1;
+		Generazione.SetUniqueID(-N);
         }
     else if (gen == 3) { //distribuzione fissa
 	std::cout << "Numero di particelle da generare:" << std::endl;    
@@ -65,12 +72,13 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 	std::cout << std::endl; 
         rndm_molt = &MyRandom::RndMolt_fissa;
         dim = N;
+		Generazione.SetUniqueID(N);
         }
     else {ofs << "Scelta non valida. Impostato il settaggio di base: estrazione dall'istogramma" << std::endl;
         rndm_molt = &MyRandom::RndMolt;
         dim = 36;
         }
-
+    
 
 
     //Creazione del funtore per MultiScattering
@@ -81,6 +89,8 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     
     //Apertura file di output, e creazione di un TTree
     TFile Ofile(output_file, "RECREATE");
+	Generazione.Write("Generazione");
+	
     TTree *tree = new TTree("Tree","TTree con 3 branches"); //Vertice, layer1 e layer2
 
     TClonesArray *riv_1 = new TClonesArray("Segnale",dim);//Hit del rivelatore 1
@@ -107,6 +117,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     tree->Branch("VertMult", &inizio.x, "x/D:y:z:molt/I"); 
     tree->Branch("Hit1", &riv_1);
     tree->Branch("Hit2", &riv_2);
+  	
 
     tree->SetAutoSave(0); //Rimuove backup cycle
     
