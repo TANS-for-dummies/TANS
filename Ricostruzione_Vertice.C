@@ -37,14 +37,7 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
     double r1 = 4.; //cm
     double r2 = 7.; //cm
     double delta_phi = 0.004; //ampiezza angolare in rad entro cui cercare corrispondenza hit
-    double sigma_Z = 5.3; //cm (deviazione standard della generazione delle Z)
-    
-    const int dim_molt = 10; //numero di molteplicita studiate
-    double molteplicita_studiate[] = {3,5,7,9,11,15,20,30,40,50}; //tiene conto delle molteplicita' medie che vogliamo analizzare con i grafici
-    //double molt_min[] = {2.5,4.5,6.5,8.5,10.5,13.5,17.5,25.5,35.5,45.5};//Minimo e massimo degli intevalli di molteplicita' studiati
-    //double molt_max[] = {3.5,5.5,7.5,9.5,11.5,16.5,22.5,34.5,44.5,54.5};
-    double molt_min[] = {2.5,4.5,6.5,8.5,10.5,14.5,19.5,29.5,39.5,49.5};//Minimo e massimo degli intevalli di molteplicita' studiati
-    double molt_max[] = {3.5,5.5,7.5,9.5,11.5,15.5,20.5,30.5,40.5,50.5};
+    double sigma_Z = 5.3; //cm (deviazione standard della generazione delle Z
 
     //Avviamo il timer	
     TStopwatch timer;
@@ -65,11 +58,38 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
     //Apertura file di input
     TFile Input_file(input);
 
-    //DA FINIRE!
-    //Lettura "Generazione"
+    
+    //------------------------------------------------------------Lettura "Generazione"------------------------------------------------------------------
+ 
     TObject *obj = (TObject*)Input_file.Get("Generazione");
+    vector<double> molteplicita_studiate; //è dichiarato double per fare il grafico dopo
+    double molteplicita_studiate_standard[10]= {3,5,7,9,11,15,20,30,40,50};
     
+    //distribuzione data
+    if(obj -> GetUniqueID() == 0){        
+        for(int i = 0; i < 10; i++){
+            molteplicita_studiate.push_back(molteplicita_studiate_standard[i]); //tiene conto delle molteplicita' medie che vogliamo analizzare con i grafici
+        }
+    }
     
+    //molteplicità fissata
+    else if(obj -> GetUniqueID() < 0){
+        molteplicita_studiate.push_back(obj->GetUniqueID());
+    }
+    
+    //molteplicità uniforme
+    else{
+        for(int i = 0; i < 10; i++){
+            if(molteplicita_studiate_standard[i] < obj->GetUniqueID()){
+                molteplicita_studiate.push_back(molteplicita_studiate_standard[i]);
+            }
+            molteplicita_studiate.push_back(obj->GetUniqueID());
+        }
+    }
+    
+    const int dim_molt = molteplicita_studiate.size();
+    
+    //----------------------------------------------------------------------------------------------------------------------------------------------------
     
     //Lettura TTree e branch
     TTree *tree = (TTree*)Input_file.Get("Tree");
