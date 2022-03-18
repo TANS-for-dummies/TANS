@@ -126,8 +126,8 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
     //loop sull'array di molteplicita' studiate per creare gli istogrammi di deltaZ per
     //singole molteplicita' ed inizializzare le gaussiane
     for (int i=0;i<dim_molt; i++) {
-        sprintf(nome, "fixed molt center %f", molteplicita_studiate[i]);
-        sprintf(titolo,"Residui - molteplicita' fissata da %f a %f", molt_min[i], molt_max[i]);
+        sprintf(nome, "fixed molt center %f", molteplicita_studiate.at(i));
+        sprintf(titolo,"Residui - molteplicita' fissata da %f a %f", molteplicita_studiate.at(i) - 0.5, molteplicita_studiate.at(i) - 0.5);
         histo_molt[i] = new TH1D(nome, titolo, 400, -1000, 1000);
         histo_molt[i] -> GetXaxis() -> SetTitle("Zrec-Zvera [#mum]");
         histo_molt[i] -> SetMarkerStyle(33);
@@ -231,11 +231,8 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
         
             //Calcolo efficienza e relativo errore
             eff[i]=eff[i]/conta_molt[i];
-            s_molt[i]=(molt_max[i]-molt_min[i])/2.;
-            double temp_1 = TMath::Sqrt((1.-eff[i])*eff[i]/conta_molt[i]);//Errore binomiale
-            double temp_2 = 1./conta_molt[i];//Errore minimo
-            if(temp_1<temp_2)s_eff[i]=temp_2;
-            else s_eff[i]=temp_1;
+            s_molt[i] = 0.5;
+            double s_eff[i] = TMath::Sqrt((1.-eff[i])*eff[i]/conta_molt[i]);//Errore binomiale
 
 
             //Fit delle gaussiane
@@ -256,10 +253,7 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
             
             //Calcolo efficienza e relativo errore
             eff_Z[i]=eff_Z[i]/conta_Z[i];
-            double temp_1 = TMath::Sqrt((1.-eff_Z[i])*eff_Z[i]/conta_Z[i]);//Errore binomiale
-            double temp_2 = 1./conta_Z[i];//Errore minimo
-            if(temp_1<temp_2)s_eff_Z[i]=temp_2;
-            else s_eff_Z[i]=temp_1;
+            double s_eff_Z[i] = TMath::Sqrt((1.-eff_Z[i])*eff_Z[i]/conta_Z[i]);//Errore binomiale
         }   
 
     }
@@ -267,7 +261,7 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
     
     //Efficienza in funzione della molteplicità
     TCanvas* c3 = new TCanvas("c3","c3",80,80,775,500);
-    efficienza = new TGraphErrors(dim_molt,molteplicita_studiate,eff,s_molt,s_eff);
+    efficienza = new TGraphErrors(dim_molt,&(molteplicita_studiate[0]),eff,s_molt,s_eff);
     efficienza->SetTitle("Efficienza vs Molteplicita'");
     efficienza->GetXaxis()->SetTitle("Molteplicita'");
     efficienza->GetYaxis()->SetTitle("Efficienza");
@@ -289,7 +283,7 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
     
     //Risoluzione
     TCanvas* c5 = new TCanvas("c5","c5",80,80,775,500);
-    risoluzione = new TGraphErrors(dim_molt,molteplicita_studiate,ris,s_molt,s_ris);
+    risoluzione = new TGraphErrors(dim_molt,&(molteplicita_studiate[0]),ris,s_molt,s_ris);
     risoluzione->SetTitle("Risoluzione vs Molteplicita'");
     risoluzione->GetXaxis()->SetTitle("Molteplicita'");
     risoluzione->GetYaxis()->SetTitle("Risoluzione (µm)");
