@@ -78,19 +78,19 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window 
     }
     
     //molteplicità fissata
-    else if(N_molt < 0){
+    else if(N_molt > 0){
         molteplicita_studiate.push_back(N_molt);
-        dim = N_molt*(-1);
+        dim = N_molt;
     }
     
     //molteplicità uniforme
     else{
         for(int i = 0; i < 10; i++){
-            if(molteplicita_studiate_standard[i] < N_molt){
+            if(molteplicita_studiate_standard[i] < -1.*N_molt-1){
                 molteplicita_studiate.push_back(molteplicita_studiate_standard[i]);
             }
         }
-        molteplicita_studiate.push_back(N_molt);
+        molteplicita_studiate.push_back(-1*N_molt-1);
     }
 
     const int dim_molt = molteplicita_studiate.size();
@@ -135,13 +135,13 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window 
     //singole molteplicita' ed inizializzare le gaussiane
     for (int i=0;i<dim_molt; i++) {
         sprintf(nome, "fixed molt center %f", molteplicita_studiate.at(i));
-        sprintf(titolo,"Residui - molteplicita' fissata da %f a %f", molteplicita_studiate.at(i) - 0.5, molteplicita_studiate.at(i) - 0.5);
+        sprintf(titolo,"Residui - molteplicita' fissata da %f a %f", molteplicita_studiate.at(i) - 0.5, molteplicita_studiate.at(i) + 0.5);
         histo_molt[i] = new TH1D(nome, titolo, 400, -1000, 1000);
         histo_molt[i] -> GetXaxis() -> SetTitle("Zrec-Zvera [#mum]");
         histo_molt[i] -> SetMarkerStyle(33);
         
         sprintf(nome, "c_molt %d", i);
-        sprintf(titolo,"Molteplicita' %d", i);
+        sprintf(titolo,"Molteplicita' %f", molteplicita_studiate.at(i));
         c_molt[i] = new TCanvas(nome, titolo, 80, 80, 775, 500);
         
     }
