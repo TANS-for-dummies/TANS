@@ -140,8 +140,8 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window 
         histo_molt[i] -> GetXaxis() -> SetTitle("Zrec-Zvera [#mum]");
         histo_molt[i] -> SetMarkerStyle(33);
         
-        sprintf(nome, "c_molt %f", i);
-        sprintf(titolo,"Molteplicita' %f", i);
+        sprintf(nome, "c_molt %d", i);
+        sprintf(titolo,"Molteplicita' %d", i);
         c_molt[i] = new TCanvas(nome, titolo, 80, 80, 775, 500);
         
     }
