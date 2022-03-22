@@ -64,33 +64,36 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window 
     //------------------------------------------------------------Lettura "Generazione"------------------------------------------------------------------
  
     TObject *obj = (TObject*)Input_file.Get("Generazione");
+    
+    int N_molt = obj -> GetUniqueID();
+    
     vector<double> molteplicita_studiate; //è dichiarato double per fare il grafico dopo
     double molteplicita_studiate_standard[10]= {3,5,7,9,11,15,20,30,40,50};
     
     //distribuzione data
-    if(obj -> GetUniqueID() == 0){        
+    if(N_molt == 0){        
         for(int i = 0; i < 10; i++){
             molteplicita_studiate.push_back(molteplicita_studiate_standard[i]); //tiene conto delle molteplicita' medie che vogliamo analizzare con i grafici
         }
     }
     
     //molteplicità fissata
-    else if(obj -> GetUniqueID() < 0){
-        molteplicita_studiate.push_back(obj->GetUniqueID());
-        dim = obj -> GetUniqueID()*(-1);
+    else if(N_molt < 0){
+        molteplicita_studiate.push_back(N_molt);
+        dim = N_molt*(-1);
     }
     
     //molteplicità uniforme
     else{
         for(int i = 0; i < 10; i++){
-            if(molteplicita_studiate_standard[i] < obj->GetUniqueID()){
+            if(molteplicita_studiate_standard[i] < N_molt){
                 molteplicita_studiate.push_back(molteplicita_studiate_standard[i]);
             }
         }
-        molteplicita_studiate.push_back(obj->GetUniqueID());
+        molteplicita_studiate.push_back(N_molt);
     }
 
-    int dim_molt = molteplicita_studiate.size();
+    const int dim_molt = molteplicita_studiate.size();
     
     //----------------------------------------------------------------------------------------------------------------------------------------------------
     
@@ -121,8 +124,9 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window 
     deltaZ->SetMarkerColor(52);
     deltaZ->SetLineColor(kBlack);
     
-    //creiamo un array di istogrammi
+    //creiamo un array di istogrammi e uno di canvas
     TH1D *histo_molt[dim_molt];
+    TCanvas *c_molt[dim_molt];
 
     char nome[30];
     char titolo[80];
@@ -135,6 +139,11 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window 
         histo_molt[i] = new TH1D(nome, titolo, 400, -1000, 1000);
         histo_molt[i] -> GetXaxis() -> SetTitle("Zrec-Zvera [#mum]");
         histo_molt[i] -> SetMarkerStyle(33);
+        
+        sprintf(nome, "c_molt %f", i);
+        sprintf(titolo,"Molteplicita' %f", i);
+        c_molt[i] = new TCanvas(nome, titolo, 80, 80, 775, 500);
+        
     }
     
 
@@ -226,8 +235,10 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window 
     deltaZ->DrawCopy("pe");
 
     
-    TCanvas* c2 = new TCanvas("c2","c2",80,80,1500,1000);
-    c2->Divide(5,2);
+   
+    
+    
+ 
 
     for(int i=0; i<TMath::Max(dim_molt, dim_Z); i++) {
         
@@ -240,7 +251,7 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window 
 
 
             //Fit delle gaussiane
-            c2->cd(i+1);
+            c_molt[i]->cd();
             histo_molt[i] -> Fit("gaus");
             TF1 *Gauss = histo_molt[i] -> GetFunction("gaus");
             gStyle->SetOptFit(1111);
