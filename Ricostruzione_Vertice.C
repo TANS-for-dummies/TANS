@@ -23,7 +23,7 @@ using std::vector;
 bool running_window(vector<double>, double, double&);
 double media(vector<double>,int,double);
 
-void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window = 0.5, int n_sigma = 3){ 
+void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window = 0.5, int n_sigma = 3){ 
     //window in cm
     //n_sigma: numero di deviazioni standard considerate per il taglio sulla Z
     //input: nome del file in input (solo .root)
@@ -51,14 +51,16 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
 
     static Vertice inizio;
 
+    int dim = 36;
+
     // Dichiarazione TClonesArray
     TClonesArray *riv_1 = new TClonesArray("Segnale",dim);
     TClonesArray *riv_2 = new TClonesArray("Segnale",dim);
- 
+
     //Apertura file di input
     TFile Input_file(input);
 
-    
+
     //------------------------------------------------------------Lettura "Generazione"------------------------------------------------------------------
  
     TObject *obj = (TObject*)Input_file.Get("Generazione");
@@ -75,6 +77,7 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
     //molteplicità fissata
     else if(obj -> GetUniqueID() < 0){
         molteplicita_studiate.push_back(obj->GetUniqueID());
+        dim = obj -> GetUniqueID()*(-1);
     }
     
     //molteplicità uniforme
@@ -83,14 +86,15 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
             if(molteplicita_studiate_standard[i] < obj->GetUniqueID()){
                 molteplicita_studiate.push_back(molteplicita_studiate_standard[i]);
             }
-            molteplicita_studiate.push_back(obj->GetUniqueID());
         }
+        molteplicita_studiate.push_back(obj->GetUniqueID());
     }
-    
-    const int dim_molt = molteplicita_studiate.size();
+
+    int dim_molt = molteplicita_studiate.size();
     
     //----------------------------------------------------------------------------------------------------------------------------------------------------
     
+ 
     //Lettura TTree e branch
     TTree *tree = (TTree*)Input_file.Get("Tree");
     TBranch *b1 = tree->GetBranch("VertMult");
@@ -135,12 +139,12 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
     
 
     //Creiamo il grafico dell'efficienza e della risoluzione in funzione della molteplicita'
-    double s_molt[dim_molt] = {0.}; //array di errori per la molteplicita
-    double eff[dim_molt] = {0.};
-    double conta_molt[dim_molt] = {0.};//conta quanti eventi hanno una certa molteplicita fissata
-    double s_eff[dim_molt] = {0.}; //array di errori per l'efficienza
-    double ris[dim_molt] = {0.}; //array per le risoluzioni prese dai fit
-    double s_ris[dim_molt] = {0.}; //array di errori sulla risoluzione 
+    vector<double> s_molt(dim_molt,0.); //array di errori per la molteplicita
+    vector<double> eff(dim_molt,0.);
+    vector<double> conta_molt(dim_molt,0.);//conta quanti eventi hanno una certa molteplicita fissata
+    vector<double> s_eff(dim_molt,0.); //array di errori per l'efficienza
+    vector<double> ris(dim_molt,0.); //array per le risoluzioni prese dai fit
+    vector<double> s_ris(dim_molt,0.); //array di errori sulla risoluzione 
     TGraphErrors *efficienza;
     TGraphErrors *risoluzione;
 
@@ -196,7 +200,7 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
 
             //DA COMPLETARE (?)
             for(int j=0; j<TMath::Max(dim_molt, dim_Z); j++){
-                if(j<dim_molt && (inizio.molt>molt_min[j]) && (inizio.molt<molt_max[j])) {
+                if(j<dim_molt && (inizio.molt>molteplicita_studiate.at(j)-0.5) && (inizio.molt<molteplicita_studiate.at(j)+0.5)) {
                     conta_molt[j]++;
                     if(Rec){
                         histo_molt[j]->Fill((Z_rec-inizio.z)*10000);
@@ -232,7 +236,7 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
             //Calcolo efficienza e relativo errore
             eff[i]=eff[i]/conta_molt[i];
             s_molt[i] = 0.5;
-            double s_eff[i] = TMath::Sqrt((1.-eff[i])*eff[i]/conta_molt[i]);//Errore binomiale
+            s_eff[i] = TMath::Sqrt((1.-eff[i])*eff[i]/conta_molt[i]);//Errore binomiale
 
 
             //Fit delle gaussiane
@@ -253,7 +257,7 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
             
             //Calcolo efficienza e relativo errore
             eff_Z[i]=eff_Z[i]/conta_Z[i];
-            double s_eff_Z[i] = TMath::Sqrt((1.-eff_Z[i])*eff_Z[i]/conta_Z[i]);//Errore binomiale
+            s_eff_Z[i] = TMath::Sqrt((1.-eff_Z[i])*eff_Z[i]/conta_Z[i]);//Errore binomiale
         }   
 
     }
@@ -261,7 +265,7 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
     
     //Efficienza in funzione della molteplicità
     TCanvas* c3 = new TCanvas("c3","c3",80,80,775,500);
-    efficienza = new TGraphErrors(dim_molt,&(molteplicita_studiate[0]),eff,s_molt,s_eff);
+    efficienza = new TGraphErrors(dim_molt,&(molteplicita_studiate[0]),&(eff[0]),&(s_molt[0]),&(s_eff[0]));
     efficienza->SetTitle("Efficienza vs Molteplicita'");
     efficienza->GetXaxis()->SetTitle("Molteplicita'");
     efficienza->GetYaxis()->SetTitle("Efficienza");
@@ -283,7 +287,7 @@ void Ricostruzione_Vertice(const char* input = 'MonteCarlo.root', double window 
     
     //Risoluzione
     TCanvas* c5 = new TCanvas("c5","c5",80,80,775,500);
-    risoluzione = new TGraphErrors(dim_molt,&(molteplicita_studiate[0]),ris,s_molt,s_ris);
+    risoluzione = new TGraphErrors(dim_molt,&(molteplicita_studiate[0]),&(ris[0]),&(s_molt[0]),&(s_ris[0]));
     risoluzione->SetTitle("Risoluzione vs Molteplicita'");
     risoluzione->GetXaxis()->SetTitle("Molteplicita'");
     risoluzione->GetYaxis()->SetTitle("Risoluzione (µm)");
@@ -351,16 +355,16 @@ bool running_window(vector<double> vec,double window,double &Z) {
             //Per ora in caso di parità viene solo tenuto il caso di finestre uguali vicine, bisogna ancora includere il caso di finestre distanti
             //(basta rimuovere l'if)
             else if(c==c_max){
-                if(j - j_max = 1 && raddoppio = 0){
+                if(j - j_max == 1 && raddoppio == 0){
                     window = 2 * window;
                     j = 0;
                     j_max = 0;
                     c_max = 0;
-                    z_max = 0;
+                    Z_max = 0;
                     k_start = 0;
                     raddoppio = 1;
-                 else  stato_rec = 0;
                 }
+                else  stato_rec = 0;
                 
             }
 
