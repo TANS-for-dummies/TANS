@@ -1,6 +1,7 @@
 //Librerie custom
 #include "Segnale.h"
 #include "Tracklet.h"
+#include "RunningWindow.h"
 
 //Librerie
 #include "Riostream.h"
@@ -23,10 +24,12 @@ using std::vector;
 bool running_window(vector<double>, double, double&);
 double media(vector<double>,int,double);
 
-void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window = 0.5, int n_sigma = 3){ 
-    //window in cm
+void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_size = 0.5, double window_step = 0.25, int n_sigma = 3){ 
+    //window e step in cm
     //n_sigma: numero di deviazioni standard considerate per il taglio sulla Z
     //input: nome del file in input (solo .root)
+
+    RunningWindow *window = new RunningWindow(window_size,window_step);
     
     
     //Costanti
@@ -202,12 +205,13 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window 
             bool Rec = 1; //indica che riusciamo a ricostruire il vertice
             double Z_rec = 0;
 
-            Rec = running_window(vec_z, window, Z_rec); //Ricostruzione con metodo della running window
+
+            //CAMBIARE ORA RESTITUISCE ZREC E VUOLE LA REFERENCE DI UN BOOL!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            Z_rec = window->running_window(vec_z, Rec); //Ricostruzione con metodo della running window
 
             if(Rec) {deltaZ -> Fill((Z_rec-inizio.z)*10000);}
 
 
-            //DA COMPLETARE (?)
             for(int j=0; j<TMath::Max(dim_molt, dim_Z); j++){
                 if(j<dim_molt && (inizio.molt>molteplicita_studiate.at(j)-0.5) && (inizio.molt<molteplicita_studiate.at(j)+0.5)) {
                     conta_molt[j]++;
@@ -229,6 +233,8 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window 
            //Reset dell'istogramma e clear del vector
            histo_z->Reset();
            vec_z.clear(); 
+           window->ResetRaddoppio();
+           window->SetSize(window_size);
         }  //chiusura if sulle z
     } //chiusura del for sugli eventi
 
@@ -306,101 +312,8 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window 
     risoluzione->SetMarkerColor(77);
     risoluzione ->Draw ("APC");
 
-
+    delete window;
 
     timer.Stop();
     timer.Print();
-}
-
-
-
-
-
-
-
-
-
-
-
-
-bool running_window(vector<double> vec,double window,double &Z) {
-
-    bool stato_rec = 1; //segna se il vertice è stato ricostruito o meno
-    double step = window/2.; //di quanto si sposta la finestra ad ogni incremento
-    int c_max = 0; //conteggio massimo
-    double Z_max = 0; //media delle Zrec nella window con conteggio massimo
-    double k_start = 0; //lower bound della finestra
-    int j_max = 0; //numero della finestra con conteggio massimo
-    bool raddoppio = 0; //segna se è già stata raddoppiata la finestra una volta
-
-    if(vec.empty()) return 0;
-    else {
-        double z_0 = vec.at(0);
-        int vec_dim = vec.size();
-        for(int j=0; vec.at(vec_dim-1) > z_0 + j*step; j++){
-
-            bool inside = 1; //segna se siamo dentro la finestra
-            bool start_window = 1; //ci serve per salvare l'indice del primo elemento del vector che entra nella finestra
-            int c = 0; //conteggio
-            int k = k_start; //salvaq l'inizio della finestra
-
-            while((k < vec_dim) && (inside)){
-                if((vec.at(k) >= z_0 + j*step) && (vec.at(k) <= z_0 + j*step + window)){
-                    if(start_window) {
-                        k_start=k; //ci salva da dove partire a scorrere sul vector per la prossima finestra
-                        start_window = 0;
-                    }
-                    c++;
-                }
-                else if(vec.at(k) > z_0 + j*step + window) inside = 0;
-                k++;
-            }
-
-            if(c>c_max) {
-                c_max = c;
-                Z_max = media(vec, k_start, z_0 + j*step + window);
-                stato_rec = 1;
-                j_max = j;
-            }
-
-            //Per ora in caso di parità viene solo tenuto il caso di finestre uguali vicine, bisogna ancora includere il caso di finestre distanti
-            //(basta rimuovere l'if)
-            else if(c==c_max){
-                if(j - j_max == 1 && raddoppio == 0){
-                    window = 2 * window;
-                    j = 0;
-                    j_max = 0;
-                    c_max = 0;
-                    Z_max = 0;
-                    k_start = 0;
-                    raddoppio = 1;
-                }
-                else  stato_rec = 0;
-                
-            }
-
-        }
-
-        Z=Z_max;
-        return stato_rec;
-    }
-}
-
-
-
-
-
-
-
-double media(vector<double> V,int j,double limite) {
-
-    int vec_dim = V.size();
-    double temp = 0;
-    int count = 0;
-    for(int i=j; i<vec_dim && V.at(i)<=limite; i++) {
-        temp+=V.at(i);
-        count++;
-    }
-    return temp/(double)count;
-
 }
