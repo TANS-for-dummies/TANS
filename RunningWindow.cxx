@@ -52,6 +52,7 @@ double RunningWindow::running_window(vector<double> vec,bool &stato_rec) {
         return 0;
     }
     else {
+        //double z_0 = -30;
         double z_0 = vec.at(0)-0.1; //cm //Punto di partenza della prima finestra
         int vec_dim = vec.size();
         for(int j=0; vec.at(vec_dim-1) > z_0 + j*dmStep; j++){

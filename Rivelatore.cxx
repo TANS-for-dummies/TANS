@@ -63,7 +63,7 @@ Particella Rivelatore::MultiScattering(Particella *part){
     double final_theta = TMath::ACos(final_dir[2]);
     double final_phi;
     
-    //final_phi è sempre ben definito poiche' se sin(theta) fosse 0 dovrei avere un punto del tipo (0,0,z) ossia sull'asse del fascio -> non possibile 
+    //final_phi e' sempre ben definito poiche' se sin(theta) fosse 0 dovrei avere un punto del tipo (0,0,z) ossia sull'asse del fascio -> non possibile 
     if(final_dir[1]>=0.) final_phi=TMath::ACos(final_dir[0]/(TMath::Sin(final_theta)));
     else final_phi=2.*TMath::Pi()-TMath::ACos(final_dir[0]/(TMath::Sin(final_theta)));
     return Particella(final_theta,final_phi);

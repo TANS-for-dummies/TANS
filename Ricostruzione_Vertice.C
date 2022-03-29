@@ -18,6 +18,7 @@
 #include "vector"
 #include "algorithm"
 #include "TF1.h"
+#include <fstream>
 
 using std::vector;
 
@@ -30,6 +31,8 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
     //input: nome del file in input (solo .root)
 
     RunningWindow *window = new RunningWindow(window_size,window_step);
+
+    std::ofstream ofs ("BadEvents.txt", std::ofstream::out);
     
     
     //Costanti
@@ -211,7 +214,7 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
 
             if(Rec) {
                 deltaZ -> Fill((Z_rec-inizio.z)*10000);
-                if(Z_rec-inizio.z>0.1) cout << i << endl;
+                if(TMath::Abs(Z_rec-inizio.z)>0.1) ofs << i << endl;
             }
 
 
@@ -241,6 +244,7 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
         }  //chiusura if sulle z
     } //chiusura del for sugli eventi
 
+    TCanvas* c_residui = new TCanvas("c_residui","Residui",80,80,775,500);
     deltaZ->DrawCopy("pe");
 
     
@@ -319,4 +323,6 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
 
     timer.Stop();
     timer.Print();
+
+    ofs.close();
 }
