@@ -209,7 +209,10 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
             //CAMBIARE ORA RESTITUISCE ZREC E VUOLE LA REFERENCE DI UN BOOL!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             Z_rec = window->running_window(vec_z, Rec); //Ricostruzione con metodo della running window
 
-            if(Rec) {deltaZ -> Fill((Z_rec-inizio.z)*10000);}
+            if(Rec) {
+                deltaZ -> Fill((Z_rec-inizio.z)*10000);
+                if(Z_rec-inizio.z>0.1) cout << i << endl;
+            }
 
 
             for(int j=0; j<TMath::Max(dim_molt, dim_Z); j++){

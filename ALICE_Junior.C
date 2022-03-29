@@ -1,7 +1,6 @@
 //Librerie custom
 #include "Rivelatore.h" //le altre classi (MyRandom, Particella, Segnale e Punto) sono incluse in Rivelatore
 
-
 //Librerie
 #include "Riostream.h"
 #include "TMath.h"
@@ -15,7 +14,7 @@
 
 
 
-void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root", int gen = 1, bool scat = 1, int N_false_hit = 0, unsigned int seed = 125) {
+void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root", int gen = 1, bool scat = 1, bool smear = 1, int N_false_hit = 0, unsigned int seed = 125) {
 	
     //Costanti
     double pi_greco = TMath::Pi();
@@ -82,9 +81,13 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 
 
     //Creazione del funtore per MultiScattering
-    Particella (Rivelatore::*rndm_scatt) (Particella*, MyRandom*);
+    Particella (Rivelatore::*rndm_scatt) (Particella*);
     if (scat){rndm_scatt = &Rivelatore::MultiScattering;}
     else {rndm_scatt = &Rivelatore::ZeroScattering;}
+
+    Segnale (Rivelatore::*smearing) (Punto*, int);
+    if(smear){smearing = &Rivelatore::Smearing;}
+    else {smearing = &Rivelatore::NoSmearing;}
 
     
     //Apertura file di output, e creazione di un TTree
@@ -153,7 +156,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 		
             //BEAM PIPE
             *hit = Beam_Pipe.Hit(Punto(inizio.x, inizio.y, inizio.z), part);
-            *part = (Beam_Pipe.*rndm_scatt)(part, ptr);
+            *part = (Beam_Pipe.*rndm_scatt)(part);
             
             //LAYER 1
             *hit = Layer1.Hit(*hit, part);
@@ -162,10 +165,10 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
             if (TMath::Abs(hit -> GetZ())<=((Layer1.GetH())/2.)){
 
                 //Immagazziniamo lo smearing (coordinale cilindriche)
-                new(hit1[pos1]) Segnale(Layer1.Smearing(hit, ptr, i+1));
+                new(hit1[pos1]) Segnale((Layer1.*smearing)(hit, i+1));
 
                 //Multiscattering
-                *part = (Layer1.*rndm_scatt)(part, ptr);
+                *part = (Layer1.*rndm_scatt)(part);
 
                 //LAYER 2
                 *hit = Layer2.Hit(*hit, part);
@@ -173,7 +176,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 	            //Controlliamo che la z del vertice sia all'interno del rivelatore
                 if(TMath::Abs(hit -> GetZ())<=((Layer2.GetH())/2.)){
                     //Immagazziniamo lo smearing
-                    new(hit2[pos2]) Segnale(Layer2.Smearing(hit, ptr, i+1));
+                    new(hit2[pos2]) Segnale((Layer2.*smearing)(hit, i+1));
                     pos2++;
                 }
                 pos1++;

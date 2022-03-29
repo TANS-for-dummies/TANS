@@ -31,10 +31,11 @@ class Rivelatore : public TObject {
 		Rivelatore& operator=(const Rivelatore& source);
 		
 		//METODI
-		Particella ZeroScattering(Particella *part, MyRandom *ptr) {return *part;};
-		Particella MultiScattering(Particella *part, MyRandom *ptr);
+		Particella ZeroScattering(Particella *part) {return *part;};
+		Particella MultiScattering(Particella *part);
 
-		Segnale Smearing(Punto *P, MyRandom *ptr, int Num_part);
+		Segnale Smearing(Punto *P, int Num_part);
+		Segnale NoSmearing(Punto *P, int Num_part);
 
 		Punto Hit(Punto P, Particella *part);
 

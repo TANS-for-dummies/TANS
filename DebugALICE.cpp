@@ -53,7 +53,7 @@ void DebugALICE(bool scat = 1) {
 	Rivelatore Layer2(7, 0.02, 27, Theta_Multi); 
 
     //Funtore per il multiscattering (per controllare che funzioni)
-    Particella (Rivelatore::*rndm_scatt) (Particella*, MyRandom*);
+    Particella (Rivelatore::*rndm_scatt) (Particella*);
     if (scat){rndm_scatt = &Rivelatore::MultiScattering;}
     else {rndm_scatt = &Rivelatore::ZeroScattering;}
 
@@ -94,6 +94,9 @@ void DebugALICE(bool scat = 1) {
     TH1D *h24 = new TH1D("Hit3Z","Z del terzo hit",300,-45.,45.);
     TH1D *h25 = new TH1D("Smear2Z","Z del secondo rivelatore dopo lo smearing",300,-45.,45.);
     TH1D *h26 = new TH1D("Smear2Phi","Z del secondo rivelatore dopo lo smearing",100,0.,6.3);
+    TH1D *h_bp = new TH1D("h_bp","Raggio dell'hit sulla BP",100,2.8,3.2);
+    TH1D *h_l1 = new TH1D("h_l1","Raggio dell'hit sulla BP",100,3.8,4.4);
+    TH1D *h_l2 = new TH1D("h_l2","Raggio dell'hit su L2",100,6.8,7.4);
 
     Punto Vertice(0.,0.,0.);
     Particella* temp_part = new Particella();
@@ -116,9 +119,10 @@ void DebugALICE(bool scat = 1) {
         h10->Fill(temp_hit->GetX());
         h11->Fill(temp_hit->GetY());
         h12->Fill(temp_hit->GetZ());
+        h_bp->Fill(temp_hit->GetRadiusXY());
 
         //Ora facciamo il multiscattering sulla beam pipe
-        *temp_part=(Beam_Pipe.*rndm_scatt)(temp_part, ptr);
+        *temp_part=(Beam_Pipe.*rndm_scatt)(temp_part);
         h13->Fill(temp_part->GetTheta());
         h14->Fill(temp_part->GetPhi());
 
@@ -127,17 +131,18 @@ void DebugALICE(bool scat = 1) {
         h15->Fill(temp_hit->GetX());
         h16->Fill(temp_hit->GetY());
         h17->Fill(temp_hit->GetZ());
+        h_l1->Fill(temp_hit->GetRadiusXY());
         //Per ora non ci preoccupiamo che Z sia entro le dimensioni del rivelatore
         //Registriamo ogni singolo dato, vogliamo solo verificare che le funzioni
         //si comportino bene
 
         //Ora facciamo smearing sull'hit per salvare l'output del rivelatore
-        *temp_segnale = Segnale(Layer2.Smearing(temp_hit, ptr, i+1));
+        *temp_segnale = Segnale(Layer2.Smearing(temp_hit, i+1));
         h18->Fill(temp_segnale->GetZ());
         h19->Fill(temp_segnale->GetPhi());
 
         //Ora calcoliamo il multiscattering sul primo rivelatore
-        *temp_part = (Layer1.*rndm_scatt)(temp_part, ptr);
+        *temp_part = (Layer1.*rndm_scatt)(temp_part);
         h20->Fill(temp_part->GetTheta());
         h21->Fill(temp_part->GetPhi());
 
@@ -146,9 +151,10 @@ void DebugALICE(bool scat = 1) {
         h22->Fill(temp_hit->GetX());
         h23->Fill(temp_hit->GetY());
         h24->Fill(temp_hit->GetZ());
+        h_l2->Fill(temp_hit->GetRadiusXY());
 
         //Ora facciamo smearing sull'hit per salvare l'output del rivelatore
-        *temp_segnale = Segnale(Layer2.Smearing(temp_hit, ptr, i+1));
+        *temp_segnale = Segnale(Layer2.Smearing(temp_hit, i+1));
         h25->Fill(temp_segnale->GetZ());
         h26->Fill(temp_segnale->GetPhi());
     }    

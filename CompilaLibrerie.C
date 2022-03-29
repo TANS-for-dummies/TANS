@@ -15,6 +15,7 @@ void CompilaLibrerie(TString Opzione="fast"){
 	gSystem->CompileMacro("MyRandom.cxx",Scelta.Data());
 	gSystem->CompileMacro("Segnale.cxx",Scelta.Data());
 	gSystem->CompileMacro("Tracklet.cxx",Scelta.Data());
+	gSystem->CompileMacro("RunningWindow.cxx",Scelta.Data());
 	
 	gSystem->CompileMacro("ALICE_Junior.C",Scelta.Data());
 	gSystem->CompileMacro("Ricostruzione_Vertice.C",Scelta.Data());

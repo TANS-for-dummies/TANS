@@ -26,13 +26,13 @@ Rivelatore& Rivelatore::operator=(const Rivelatore& source){
 
 
 
-Particella Rivelatore::MultiScattering(Particella *part, MyRandom *ptr){
+Particella Rivelatore::MultiScattering(Particella *part){
 
     //deviazione dalla direzione di entrata
 
     double ThetaP = 0.;
-    do {ThetaP = ptr -> Gaus(0,dmTheta);} while(ThetaP<0); //vogliamo theta >=0 (il do serve per farlo eseguire almeno una volta)
-    double PhiP = ptr -> Rndm()*2.*TMath::Pi();
+    do {ThetaP = gRandom -> Gaus(0,dmTheta);} while(ThetaP<0); //vogliamo theta >=0 (il do serve per farlo eseguire almeno una volta)
+    double PhiP = gRandom -> Rndm()*2.*TMath::Pi();
 
     double mr[3][3];
     mr[0][0] = - TMath::Sin(part->GetPhi()); 
@@ -69,16 +69,16 @@ Particella Rivelatore::MultiScattering(Particella *part, MyRandom *ptr){
     return Particella(final_theta,final_phi);
 }
 
-Segnale Rivelatore:: Smearing(Punto *P, MyRandom *ptr, int Num_part){
+Segnale Rivelatore:: Smearing(Punto *P, int Num_part){
 
-    double z = P->GetZ() + ptr->Gaus(0,0.012);
+    double z = P->GetZ() + gRandom->Gaus(0,0.012);
     double temp_phi = 0;
     
     if(P->GetY()>=0.) temp_phi = TMath::ACos(P->GetX()/P->GetRadiusXY());
     else temp_phi = 2.*TMath::Pi() - TMath::ACos(P->GetX()/P->GetRadiusXY());
     
     
-    double phi = temp_phi + (ptr->Gaus(0,0.003))/P->GetRadiusXY();
+    double phi = temp_phi + (gRandom->Gaus(0,0.003))/P->GetRadiusXY();
 
     //Controllo che Phi rimanga dentro l'intervallo giusto anche dopo lo smearing
     if(phi<0.) phi += 2.*TMath::Pi();
@@ -86,6 +86,15 @@ Segnale Rivelatore:: Smearing(Punto *P, MyRandom *ptr, int Num_part){
 
     Segnale temp(z,phi,Num_part);
 
+    return temp; 
+}
+
+Segnale Rivelatore::NoSmearing(Punto *P, int Num_part) {
+    double z = P->GetZ();
+    double phi = 0;
+    if(P->GetY()>=0.) phi = TMath::ACos(P->GetX()/P->GetRadiusXY());
+    else phi = 2.*TMath::Pi() - TMath::ACos(P->GetX()/P->GetRadiusXY());
+    Segnale temp(z,phi,Num_part);
     return temp; 
 }
 
