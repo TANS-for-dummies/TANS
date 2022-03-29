@@ -32,7 +32,7 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
 
     RunningWindow *window = new RunningWindow(window_size,window_step);
 
-    std::ofstream ofs ("BadEvents.txt", std::ofstream::out);
+    //std::ofstream ofs ("BadEvents.txt", std::ofstream::out);
     
     
     //Costanti
@@ -214,7 +214,7 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
 
             if(Rec) {
                 deltaZ -> Fill((Z_rec-inizio.z)*10000);
-                if(TMath::Abs(Z_rec-inizio.z)>0.1) ofs << i << endl;
+                //if(TMath::Abs(Z_rec-inizio.z)>0.1) ofs << i << endl;
             }
 
 
@@ -324,5 +324,5 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
     timer.Stop();
     timer.Print();
 
-    ofs.close();
+    //ofs.close();
 }
