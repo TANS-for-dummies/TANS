@@ -1,5 +1,6 @@
 # TANS
-Impact point reconstruction 
+Ricostruzione del vertice di impatto per un collider.
+
 Per eseguire le 2 macro di simulazione e ricostruzione prima compilare CompilaLibreria.C
 Le simulazioni sono ottenibili da ALICE_Junior.C, la cui macro è MonteCarlo()
 
