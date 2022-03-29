@@ -137,11 +137,12 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
         inizio.y = ptr->Gaus(0.,0.01);
         inizio.z = ptr->Gaus(0.,5.3);
         inizio.molt = (ptr->*rndm_molt)(N);
-        
+        /*
         if(k==verboseEvent) {
             ofs << "Vertice in (" << inizio.x << ", "<<inizio.y << ", "<<inizio.z << ") e molteplicita " << inizio.molt << std::endl << std::endl;
         }
-	    //if (k/1000 == 0){ofs << "(" << inizio.x << ", "<<inizio.y << ", "<<inizio.z << ") e molteplicita " << inizio.molt << std::endl;};
+	*/
+	if (k/1000 == 0){ofs << "(" << inizio.x << ", "<<inizio.y << ", "<<inizio.z << ") e molteplicita " << inizio.molt << std::endl;};
 	
         int pos1 = 0;
         int pos2 = 0;
@@ -151,16 +152,16 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
             //Generiamo i prodotti nel vertice
             part->SetTheta(ptr->RndTheta());
             part->SetPhi(ptr->Rndm()*2.*pi_greco);
-            if (k == verboseEvent){ofs << "Particella Numero " << i+1 << " : ( " << part->GetTheta() << " , " <<  part->GetPhi() << " )" << std::endl;};
-            //if (k/1000 == 0){ofs << "Particella Numero " << i+1 << " : ( " << part->GetTheta() << " , " <<  part->GetPhi() << " )" << std::endl;}; 
+            //if (k == verboseEvent){ofs << "Particella Numero " << i+1 << " : ( " << part->GetTheta() << " , " <<  part->GetPhi() << " )" << std::endl;};
+            if (k/1000 == 0){ofs << "Particella Numero " << i+1 << " : ( " << part->GetTheta() << " , " <<  part->GetPhi() << " )" << std::endl;}; 
             
             //Trasporto e multiscattering particella per particella
 		
             //BEAM PIPE
             *hit = Beam_Pipe.Hit(Punto(inizio.x, inizio.y, inizio.z), part);
-            if (k == verboseEvent){ofs << "Hit sulla BP della particella " << i << " in (" << hit->GetX() << ", " << hit->GetY() << ", " << hit->GetZ() << ")" << endl;}
+            //if (k == verboseEvent){ofs << "Hit sulla BP della particella " << i << " in (" << hit->GetX() << ", " << hit->GetY() << ", " << hit->GetZ() << ")" << endl;}
             *part = (Beam_Pipe.*rndm_scatt)(part);
-            if (k == verboseEvent){ofs << "Multiscattering della particella " << i << "sulla BP in (" << part->GetTheta() << ", " << part->GetPhi() << ")" << endl;}
+            //if (k == verboseEvent){ofs << "Multiscattering della particella " << i << "sulla BP in (" << part->GetTheta() << ", " << part->GetPhi() << ")" << endl;}
             
             //LAYER 1
             *hit = Layer1.Hit(*hit, part);
@@ -168,27 +169,29 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 	        //Controlliamo che la z del vertice sia all'interno del rivelatore
             if (TMath::Abs(hit -> GetZ())<=((Layer1.GetH())/2.)){
 
-                if (k == verboseEvent){ofs << "Hit su L1 della particella " << i << " in (" << hit->GetX() << ", " << hit->GetY() << ", " << hit->GetZ() << ")" << endl;}
+                //if (k == verboseEvent){ofs << "Hit su L1 della particella " << i << " in (" << hit->GetX() << ", " << hit->GetY() << ", " << hit->GetZ() << ")" << endl;}
 
                 //Immagazziniamo lo smearing (coordinale cilindriche)
                 new(hit1[pos1]) Segnale((Layer1.*smearing)(hit, i+1));
-                Segnale *tst = (Segnale*)hit1[pos1];
+                /*
+		Segnale *tst = (Segnale*)hit1[pos1];
                 if (k == verboseEvent){ofs <<"Particella "<<i<<" su L1) Z , phi = "<<tst->GetZ()<<"; "<<tst->GetPhi()<<std::endl;};
-
+		*/
+		    
                 //Multiscattering
                 *part = (Layer1.*rndm_scatt)(part);
-                if (k == verboseEvent){ofs << "Multiscattering della particella " << i << "su L1 in (" << part->GetTheta() << ", " << part->GetPhi() << ")" << endl;}
+                //if (k == verboseEvent){ofs << "Multiscattering della particella " << i << "su L1 in (" << part->GetTheta() << ", " << part->GetPhi() << ")" << endl;}
 
                 //LAYER 2
                 *hit = Layer2.Hit(*hit, part);
 		    
 	            //Controlliamo che la z del vertice sia all'interno del rivelatore
                 if(TMath::Abs(hit -> GetZ())<=((Layer2.GetH())/2.)){
-                    if (k == verboseEvent){ofs << "Hit su L2 della particella " << i << " in (" << hit->GetX() << ", " << hit->GetY() << ", " << hit->GetZ() << ")" << endl;}
+                    //if (k == verboseEvent){ofs << "Hit su L2 della particella " << i << " in (" << hit->GetX() << ", " << hit->GetY() << ", " << hit->GetZ() << ")" << endl;}
                     //Immagazziniamo lo smearing
                     new(hit2[pos2]) Segnale((Layer2.*smearing)(hit, i+1));
-                    Segnale *tst2 = (Segnale*)hit2[pos2];
-                if (k == verboseEvent){ofs <<"Particella "<<i<<" su L2) Z , phi = "<<tst2->GetZ()<<"; "<<tst2->GetPhi()<<std::endl<< std::endl;};
+                    //Segnale *tst2 = (Segnale*)hit2[pos2];
+                    //if (k == verboseEvent){ofs <<"Particella "<<i<<" su L2) Z , phi = "<<tst2->GetZ()<<"; "<<tst2->GetPhi()<<std::endl<< std::endl;};
 
                     pos2++;
                 }
@@ -204,7 +207,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
             new(hit1[pos1+i]) Segnale(-(Layer1.GetH())/2.+(ptr->Rndm())*(Layer1.GetH()),ptr->Rndm()*2*pi_greco, -(i+1));
             new(hit2[pos2+i]) Segnale(-(Layer2.GetH())/2.+(ptr->Rndm())*(Layer2.GetH()),ptr->Rndm()*2*pi_greco, -(i+1));
         }
-/*
+
         // Debug
         //printf("Entries nel TClonesArray: %d\n",riv_1->GetEntries());
         for (int j=0; j<hit1.GetEntries(); j++){
@@ -217,7 +220,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
         if (k/1000 == 0){ofs <<"Particella "<<j+1<<") Z , phi = "<<tst->GetZ()<<"; "<<tst->GetPhi()<<std::endl;};
         }
         // fine del debug
- */       
+        
 
         tree->Fill();
 
