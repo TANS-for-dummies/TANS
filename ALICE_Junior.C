@@ -15,13 +15,21 @@
 
 
 void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root", int gen = 1, bool scat = 1, bool smear = 1, int N_false_hit = 0, unsigned int seed = 125, int verboseEvent = 3154) {
-
+    /*
+    N_esp è il numero di esperimenti che si vuole simulare
+    output_file è il nome del file di output che verrà generato dal programma, l'estensione deve sempre essere .root
+    gen seleziona il tipo di generazione della molteplicità (distribuzione data=1, uniforme=2, costante=3)
+    scat attiva (1) o disattiva (0) il multiscattering sui rivelatori
+    smear attiva (1) o disattiva (0) lo smearing degli hit
+    N_false_hit indica il numero di hit falsi che devono essere generati uniformemente sul rivelatore
+    */
+	
     //Costanti
     double pi_greco = TMath::Pi();
-    double Theta_Multi = 0.001/(TMath::Sqrt2()); //rad
+    double Theta_Multi = 0.001/(TMath::Sqrt2()); //rad, deviazione standard della gaussiana che utilizziamo che estrarre il theta' del multiscattering
     
     //Settaggi input e output
-    const char* input_file = "kinem.root";
+    const char* input_file = "kinem.root"; //file con le distribuzioni di molteplicità e pseudorapidità assegnate
   
 
     //Avviamo il timer	
@@ -43,11 +51,9 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     }
 
 	
-    //Salviamo "Generazione"
+    //Creiamo "Generazione", lo useremo per indicare come è stata generata la molteplicità
     TObject Generazione;
 	
-	
-
     //Creazione del funtore per scegliere la molteplicita'
     int dim = 0;
     int N;
@@ -80,7 +86,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     
 
 
-    //Creazione del funtore per MultiScattering
+    //Creazione del funtore per MultiScattering e per lo smearing
     Particella (Rivelatore::*rndm_scatt) (Particella*);
     if (scat){rndm_scatt = &Rivelatore::MultiScattering;}
     else {rndm_scatt = &Rivelatore::ZeroScattering;}
@@ -202,7 +208,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 	    
 	    
 
-        //Generazione dei false hit (uniformi in Z e phi)
+        //Generazione dei false hit (uniformi in Z e phi) Z in cm
         for(int i=0; i<N_false_hit; i++) {
             new(hit1[pos1+i]) Segnale(-(Layer1.GetH())/2.+(ptr->Rndm())*(Layer1.GetH()),ptr->Rndm()*2*pi_greco, -(i+1));
             new(hit2[pos2+i]) Segnale(-(Layer2.GetH())/2.+(ptr->Rndm())*(Layer2.GetH()),ptr->Rndm()*2*pi_greco, -(i+1));
@@ -240,6 +246,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     //Chiudiamo il file log	
     ofs.close();
 	
+    //Deallochiamo i puntatori
     delete part;
     delete hit;
 
