@@ -61,8 +61,18 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 	}
 
 	
-    //Creiamo "Generazione", lo useremo per indicare come è stata generata la molteplicità
-    TObject Generazione;
+    //Creiamo una struct per indicare come sono state generate la molteplicità e la z del vertice
+	typedef struct{
+		int Generazione_z;
+        double z_costante;
+        int Generazione_molt;
+    } Generazione;
+    
+    Generazione setteggi;
+	
+	settaggi.Generazione_z = gen_z;
+	settaggi.z_costante = z_fissa;
+		
 	
     //Creazione del funtore per scegliere la molteplicita'
     int dim = 0;
@@ -71,7 +81,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     if(gen_molt == 1) { //distribuzione estratta da grafico fornito
         rndm_molt = &MyRandom::RndMolt;
         dim = 36; //68.27% di 53 (massimo valore della molteplicità)
-		Generazione.SetUniqueID(0);
+		settaggi.Generazione_molt = 0;
         }
     else if (gen_molt == 2) { //distribuzione uniforme
 	std::cout << "Numero massimo di particelle generabile con distribuzione uniforme:" << std::endl;    
@@ -79,7 +89,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 	std::cout << std::endl;    
         rndm_molt = &MyRandom::RndMolt_unif;
         dim = N/2 +1;
-		Generazione.SetUniqueID(-N);
+		settaggi.Generazione_molt = -N;
         }
     else if (gen_molt == 3) { //distribuzione fissa
 	std::cout << "Numero di particelle da generare:" << std::endl;    
@@ -87,11 +97,12 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 	std::cout << std::endl; 
         rndm_molt = &MyRandom::RndMolt_fissa;
         dim = N;
-		Generazione.SetUniqueID(N);
+		settaggi.Generazione_molt = N;
         }
     else {ofs << "Scelta non valida. Impostato il settaggio di base: estrazione dall'istogramma" << std::endl;
         rndm_molt = &MyRandom::RndMolt;
         dim = 36;
+		settaggi.Generazione_molt = 0;  
         }
     
 
@@ -108,7 +119,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     
     //Apertura file di output, e creazione di un TTree
     TFile Ofile(output_file, "RECREATE");
-	Generazione.Write("Generazione");
+	settaggi.Write("Generazione");
 	
     TTree *tree = new TTree("Tree","TTree con 3 branches"); //Vertice, layer1 e layer2
 
@@ -163,6 +174,8 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 				inizio.z = z_fissa;
 				break;
 			default:
+				std::cout << "Scelta non valida. Impostato il settaggio di base: distribuzione gaussiana" << std::endl;
+				gen_z = 1;
 				inizio.z = ptr->Gaus(0.,5.3);
 		}
         
