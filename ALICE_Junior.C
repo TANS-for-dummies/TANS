@@ -14,11 +14,12 @@
 
 
 
-void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root", int gen = 1, bool scat = 1, bool smear = 1, int N_false_hit = 0, unsigned int seed = 125, int verboseEvent = 3154) {
+void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root", int gen_molt = 1, int gen_z = 1, bool scat = 1, bool smear = 1, int N_false_hit = 0, unsigned int seed = 125, int verboseEvent = 3154) {
     /*
     N_esp è il numero di esperimenti che si vuole simulare
     output_file è il nome del file di output che verrà generato dal programma, l'estensione deve sempre essere .root
-    gen seleziona il tipo di generazione della molteplicità (distribuzione data=1, uniforme=2, costante=3)
+    gen_molt seleziona il tipo di generazione della molteplicità (distribuzione data=1, uniforme=2, costante=3)
+    gen_z seleziona il tipo di generazione delle z (distribuzione gaussiana=1, uniforme=2, costante=3)
     scat attiva (1) o disattiva (0) il multiscattering sui rivelatori
     smear attiva (1) o disattiva (0) lo smearing degli hit
     N_false_hit indica il numero di hit falsi che devono essere generati uniformemente sul rivelatore
@@ -49,6 +50,15 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     	ofs << "File con le distribuzioni non trovato" << std::endl; 
     	return;
     }
+	
+	//Creiamo una variabile per fissare la z nel caso di generazione secondo distribuzione costante
+	double z_fissa = 0.;
+	
+	if(gen_z==3){
+		std::cout << "Valore coordinata z del vertice:" << std::endl;    
+		std::cin >> z_fissa;
+		std::cout << std::endl; 
+	}
 
 	
     //Creiamo "Generazione", lo useremo per indicare come è stata generata la molteplicità
@@ -58,12 +68,12 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     int dim = 0;
     int N;
     int (MyRandom::*rndm_molt) (int); 
-    if(gen == 1) { //distribuzione estratta da grafico fornito
+    if(gen_molt == 1) { //distribuzione estratta da grafico fornito
         rndm_molt = &MyRandom::RndMolt;
         dim = 36; //68.27% di 53 (massimo valore della molteplicità)
 		Generazione.SetUniqueID(0);
         }
-    else if (gen == 2) { //distribuzione uniforme
+    else if (gen_molt == 2) { //distribuzione uniforme
 	std::cout << "Numero massimo di particelle generabile con distribuzione uniforme:" << std::endl;    
 	std::cin >> N;
 	std::cout << std::endl;    
@@ -71,7 +81,7 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
         dim = N/2 +1;
 		Generazione.SetUniqueID(-N);
         }
-    else if (gen == 3) { //distribuzione fissa
+    else if (gen_molt == 3) { //distribuzione fissa
 	std::cout << "Numero di particelle da generare:" << std::endl;    
 	std::cin >> N;
 	std::cout << std::endl; 
@@ -108,9 +118,9 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
     TClonesArray &hit2 = *riv_2;
     
     //Rivelatori
-    Rivelatore Beam_Pipe(3, 0.08, 52, Theta_Multi); //H=52 per contenere tutte le particelle generate con l'accettanza data
-    Rivelatore Layer1(4, 0.02, 27, Theta_Multi);
-    Rivelatore Layer2(7, 0.02, 27, Theta_Multi);
+    Rivelatore Beam_Pipe(3, 0.08, 52, Theta_Multi, 0., 0.); //H=52 per contenere tutte le particelle generate con l'accettanza data
+    Rivelatore Layer1(4, 0.02, 27, Theta_Multi, 0.012, 0.003);
+    Rivelatore Layer2(7, 0.02, 27, Theta_Multi, 0.012, 0.003);
     
 
     //Definiamo una struct che contenga le caratteristiche del vertice (coordinate e molteplicita') 
@@ -141,7 +151,21 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
         //Unita di misura della lunghezza = cm
         inizio.x = ptr->Gaus(0.,0.01);
         inizio.y = ptr->Gaus(0.,0.01);
-        inizio.z = ptr->Gaus(0.,5.3);
+		
+		switch(gen_z) {
+			case 1:
+				inizio.z = ptr->Gaus(0.,5.3);
+				break;
+			case 2:
+				inizio.z = ptr->Rndm()*27. - 13.5;
+				break;
+			case 3:
+				inizio.z = z_fissa;
+				break;
+			default:
+				inizio.z = ptr->Gaus(0.,5.3);
+		}
+        
         inizio.molt = (ptr->*rndm_molt)(N);
         /*
         if(k==verboseEvent) {
