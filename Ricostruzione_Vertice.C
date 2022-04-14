@@ -118,8 +118,7 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
     //Creiamo un tracklet, con r1 ed r2 fissati
     Tracklet* tr = new Tracklet(r1, r2, 0., 0.); //Primo punto: layer 1; Secondo punto: layer 2
     
-    //Creiamo un istogramma e un vector per le z
-    TH1D* histo_z = new TH1D("histo_z", "Istogramma delle z", 250, -21.2, 21.2); //4 sigma a destra e a sinistra
+    //Creiamo un vector per le z
     vector<double> vec_z; 
     
 
@@ -195,13 +194,11 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
 
                     if( TMath::Abs(interazione1->GetPhi() - interazione2->GetPhi()) <= delta_phi ){
                         tr->SetZ2(interazione2->GetZ());
-                        histo_z->Fill(tr->Intersezione());//Riempiamo l'istogramma con le intersezioni tra tracklet ed asse del fascio
                         vec_z.push_back(tr->Intersezione()); //riempiamo il vector
                     }
                }
            } //fine del loop sul TClonesArray
 
-            //histo_z->DrawCopy();
 
             sort(vec_z.begin(), vec_z.end()); //riordiniamo il vector in ordine crescente
 
@@ -209,7 +206,6 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
             double Z_rec = 0;
 
 
-            //CAMBIARE ORA RESTITUISCE ZREC E VUOLE LA REFERENCE DI UN BOOL!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             Z_rec = window->running_window(vec_z, Rec); //Ricostruzione con metodo della running window
 
             if(Rec) {
@@ -236,8 +232,7 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
                 }
             }
         
-           //Reset dell'istogramma e clear del vector
-           histo_z->Reset();
+           //Reset della window e clear del vector
            vec_z.clear(); 
            window->ResetRaddoppio();
            window->SetSize(window_size);
