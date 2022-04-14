@@ -66,9 +66,9 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 		int Generazione_z;
         double z_costante;
         int Generazione_molt;
-    } Generazione;
+    } Gen;
     
-    Generazione settaggi;
+    Gen settaggi;
 	
 	settaggi.Generazione_z = gen_z;
 	settaggi.z_costante = z_fissa;
