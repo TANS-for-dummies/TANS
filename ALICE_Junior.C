@@ -62,13 +62,13 @@ void MonteCarlo(int N_esp = 1000000, const char* output_file = "MonteCarlo.root"
 
 	
     //Creiamo una struct per indicare come sono state generate la molteplicità e la z del vertice
-	typedef struct{
-			int Generazione_z;
-        	double z_costante;
-        	int Generazione_molt;
-    	} Generazione;
+	typedef struct : TObject{
+		int Generazione_z;
+        double z_costante;
+        int Generazione_molt;
+    } Generazione;
     
-    Generazione setteggi;
+    Generazione settaggi;
 	
 	settaggi.Generazione_z = gen_z;
 	settaggi.z_costante = z_fissa;
