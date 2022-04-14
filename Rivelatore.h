@@ -19,7 +19,7 @@ class Rivelatore : public TObject {
 		Rivelatore();
 		
 		//Costruttore di default
-		Rivelatore(double r, double s, double H, double Theta);
+		Rivelatore(double r, double s, double H, double Theta, double smear_z, double smear_rphi);
 		
 		//Copy
 		Rivelatore(const Rivelatore& source);
@@ -45,18 +45,24 @@ class Rivelatore : public TObject {
 		double GetS() const {return dmS;};
 		double GetH() const {return dmH;};
 		double GetTheta() const {return dmTheta;};
+		double GetSmear_z() const {return dmSmear_z;};
+		double GetSmear_rphi() const {return dmSmear_rphi;};
 		
 		//SETTER
 		void SetR(double r) {dmR=r;};
 		void SetS(double s) {dmS=s;};
 		void SetH(double H) {dmH=H;};
 		void SetTheta(double Theta) {dmTheta=Theta;};
+		void SetSmear_z(double smear_z) {dmSmear_z=smear_z;};
+		void SetSmear_rphi(double smear_rphi) {dmSmear_rphi=smear_rphi;};
 	
 	private:
 		double dmR; //Raggio
 		double dmS; //Spessore
 		double dmH; //Lunghezza 
 		double dmTheta; //Angolo planare rms
+		double dmSmear_z; //Deviazione standard smearing su Z
+		double dmSmear_rphi; //Deviazione standard smearing su r*phi
 
 ClassDef(Rivelatore,1)
 };
