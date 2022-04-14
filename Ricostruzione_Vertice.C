@@ -76,7 +76,7 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
         	int Generazione_molt;
     	} Gen;
     
-    Gen setteggi;
+    Gen settaggi;
     
     settaggi = (Gen)Input_file.Get("Generazione");
     
