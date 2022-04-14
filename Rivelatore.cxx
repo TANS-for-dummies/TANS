@@ -5,13 +5,13 @@
 ClassImp(Rivelatore)
 
 //Costruttore di default
-Rivelatore::Rivelatore(): dmR(0.), dmS(0.), dmH(0.), dmTheta(0.), TObject() {}
+Rivelatore::Rivelatore(): dmR(0.), dmS(0.), dmH(0.), dmTheta(0.), dmSmear_z(0.), dmSmear_rphi(0.), TObject() {}
 
 //Costruttore standard
-Rivelatore::Rivelatore(double r, double s, double H, double Theta): dmR(r), dmS(s), dmH(H), dmTheta(Theta), TObject() {}
+Rivelatore::Rivelatore(double r, double s, double H, double Theta, double smear_z, double smear_rphi): dmR(r), dmS(s), dmH(H), dmTheta(Theta), dmSmear_z(smear_z), dmSmear_rphi(smear_rphi), TObject() {}
 
 //Copy
-Rivelatore::Rivelatore(const Rivelatore& source) : dmR(source.dmR), dmS(source.dmS), dmH(source.dmH), dmTheta(source.dmTheta), TObject(source) {}
+Rivelatore::Rivelatore(const Rivelatore& source) : dmR(source.dmR), dmS(source.dmS), dmH(source.dmH), dmTheta(source.dmTheta), dmSmear_z(souce.dmSmear_z), dmSmear_rphi(source.dmSmear_rphi), TObject(source) {}
 
 //Distruttore
 Rivelatore::~Rivelatore() {}
@@ -71,14 +71,14 @@ Particella Rivelatore::MultiScattering(Particella *part){
 
 Segnale Rivelatore:: Smearing(Punto *P, int Num_part){
 
-    double z = P->GetZ() + gRandom->Gaus(0,0.012);
+    double z = P->GetZ() + gRandom->Gaus(0,dmSmear_z);
     double temp_phi = 0;
     
     if(P->GetY()>=0.) temp_phi = TMath::ACos(P->GetX()/P->GetRadiusXY());
     else temp_phi = 2.*TMath::Pi() - TMath::ACos(P->GetX()/P->GetRadiusXY());
     
     
-    double phi = temp_phi + (gRandom->Gaus(0,0.003))/P->GetRadiusXY();
+    double phi = temp_phi + (gRandom->Gaus(0,dmSmear_rphi))/P->GetRadiusXY();
 
     //Controllo che Phi rimanga dentro l'intervallo giusto anche dopo lo smearing
     if(phi<0.) phi += 2.*TMath::Pi();
