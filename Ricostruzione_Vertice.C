@@ -69,9 +69,19 @@ void Ricostruzione_Vertice(const char* input = "MonteCarlo.root", double window_
 
     //------------------------------------------------------------Lettura "Generazione"------------------------------------------------------------------
  
-    TObject *obj = (TObject*)Input_file.Get("Generazione");
+    //Creiamo una struct per indicare come sono state generate la molteplicità e la z del vertice
+	typedef struct : TObject{
+			int Generazione_z;
+        	double z_costante;
+        	int Generazione_molt;
+    	} Gen;
     
-    int N_molt = obj -> GetUniqueID();
+    Gen setteggi;
+    
+    settaggi = (Gen)Input_file.Get("Generazione");
+    
+    int N_molt = settaggi.Generazione_molt;
+    std::cout << "N_molt: " << N_molt << std::endl;
     
     vector<double> molteplicita_studiate; //è dichiarato double per fare il grafico dopo
     double molteplicita_studiate_standard[10]= {3,5,7,9,11,15,20,30,40,50};
